@@ -17,6 +17,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 app.config['DATABASE'] = os.environ.get('DATABASE', '/data/golf_booking_db.db')
 app.config['DEFAULT_ADMIN_USER'] = os.environ.get('DEFAULT_ADMIN_USER', 'admin')
 app.config['DEFAULT_ADMIN_PASS'] = os.environ.get('DEFAULT_ADMIN_PASS', 'admin')
+app.config['SESSION_PERMANENT'] = True
+app.permanent_session_lifetime = __import__('datetime').timedelta(days=365)
 
 @app.after_request
 def add_no_cache_headers(response):
@@ -299,6 +301,7 @@ def login():
         db = get_db()
         user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         if user and check_password_hash(user['password_hash'], password):
+            session.permanent = True
             session['user_id'] = user['id']
             session['username'] = user['username']
             session['user_role'] = user['role']
