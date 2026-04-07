@@ -1,6 +1,6 @@
 # Golf Booking Database
 
-**Version 0.1.1** | A [viibeware Corp.](https://viibeware.com) Application
+**Version 0.1.2** | A [viibeware Corp.](https://viibeware.com) Application
 
 A self-hosted web application for collecting and managing customer intake information at a golf resort. Built with Flask and SQLite, packaged as a Docker container for easy deployment.
 
@@ -231,36 +231,47 @@ The intake is assigned an auto-generated number (GBD1001, GBD1002, etc.) and app
 
 ---
 
-## User Roles & Multi-User
+## User Roles & Permissions
 
-The application supports multiple users with role-based access control.
+The application supports multiple users with role-based access control and granular per-user permissions.
 
-| Capability           | Editor | Admin |
-|----------------------|--------|-------|
-| View own records     | ✅     | ✅    |
-| View all records     | ❌     | ✅    |
-| Create intakes       | ✅     | ✅    |
-| Edit own intakes     | ✅     | ✅    |
-| Archive/restore      | ✅     | ✅    |
-| Delete intakes       | ❌     | ✅    |
-| Import/Export CSV     | ✅     | ✅    |
-| Manage users         | ❌     | ✅    |
-| Change theme         | ✅     | ✅    |
+### Roles
+
+| Role   | Description                                                              |
+|--------|--------------------------------------------------------------------------|
+| Admin  | Full access to everything. All permissions always enabled.               |
+| Editor | Access controlled by per-user permission toggles set by an admin.        |
+
+### Permission Toggles
+
+Admins can enable or disable the following permissions for each editor individually via **Settings > Users**:
+
+| Permission  | Default | What it controls                                              |
+|-------------|---------|---------------------------------------------------------------|
+| Delete      | Off     | Permanently delete intake records                             |
+| Archive     | On      | Archive and restore records                                   |
+| Export      | On      | Export records to CSV (active, archived, or all)              |
+| Import      | On      | Import records from CSV via Settings                          |
+| View All    | Off     | See all users' records (instead of only their own)            |
+| Print/PDF   | On      | Access print view and PDF export for records                  |
+
+> **Note:** User creation and management is always restricted to admins only, regardless of editor permissions.
 
 ### Multi-User Isolation
 
-- **Editors** can only see and manage records they created. They cannot access records created by other users.
-- **Admins** can see and manage all records across all users.
-- The **Recent** sidebar section shows each user's own recent intakes (admins see all).
-- **CSV exports** respect user isolation — editors only export their own records.
+- By default, **editors** can only see and manage records they created.
+- Enabling **View All** for an editor allows them to see all records across all users.
+- **Admins** always see all records.
+- **CSV exports** respect user isolation — editors without View All only export their own records.
+- The **Recent** sidebar section shows each user's own recent intakes (or all, if View All is enabled).
 
-### Managing Users
+### Managing Users & Permissions
 
-1. Click **Settings** in the sidebar (admin only for the Users tab)
-2. Go to the **Users** tab
-3. Add new users with a username, password, and role
-4. Edit roles or reset passwords for existing users
-5. Delete users (you cannot delete your own account)
+1. Click **Settings** in the sidebar
+2. Go to the **Users** tab (admin only)
+3. Each editor user shows toggle switches for their permissions
+4. Toggle any permission on or off — changes take effect immediately
+5. Add new users, change roles, reset passwords, or delete users from the same panel
 
 ---
 

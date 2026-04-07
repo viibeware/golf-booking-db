@@ -1,4 +1,4 @@
-/* ─── Golf Booking Database v0.1.1 ─── */
+/* ─── Golf Booking Database v0.1.2 ─── */
 
 /* ═══ DARK THEME (default) ═══ */
 :root, [data-theme="dark"] {
@@ -654,12 +654,14 @@ tbody td { padding: 10px 14px; color: var(--text-primary); }
 .settings-about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
 .settings-user-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: var(--radius-sm);
+    padding: 14px 12px; border-radius: var(--radius-sm);
     border-bottom: 1px solid var(--border-subtle); transition: background var(--transition);
 }
 .settings-user-row:last-child { border-bottom: none; }
 .settings-user-row:hover { background: var(--bg-hover); }
+.settings-user-header {
+    display: flex; align-items: center; gap: 12px;
+}
 .settings-user-avatar {
     width: 32px; height: 32px; border-radius: 50%;
     background: var(--accent-dim); border: 1px solid var(--accent-soft);
@@ -676,6 +678,38 @@ tbody td { padding: 10px 14px; color: var(--text-primary); }
 .settings-user-actions input[type="password"] { width: 100px; }
 .settings-user-self-label { font-size: 0.68rem; color: var(--text-muted); font-style: italic; }
 .settings-add-user-form .form-row { margin-bottom: 12px; }
+
+/* Permission toggles */
+.perm-toggles {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 14px;
+    padding: 10px 0 0 44px;
+}
+.perm-toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 3px 0;
+}
+.perm-toggle-label {
+    font-size: 0.76rem; font-weight: 500; color: var(--text-secondary);
+}
+.perm-toggles-admin {
+    padding: 8px 0 0 44px; font-size: 0.74rem; color: var(--text-muted); font-style: italic;
+}
+.perm-switch {
+    position: relative; display: inline-block; width: 34px; height: 18px; flex-shrink: 0;
+}
+.perm-switch input { opacity: 0; width: 0; height: 0; }
+.perm-switch-slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-color); border-radius: 18px;
+    transition: 0.2s;
+}
+.perm-switch-slider:before {
+    position: absolute; content: ""; height: 14px; width: 14px;
+    left: 2px; bottom: 2px; background-color: var(--bg-primary);
+    border-radius: 50%; transition: 0.2s;
+}
+.perm-switch input:checked + .perm-switch-slider { background-color: var(--accent); }
+.perm-switch input:checked + .perm-switch-slider:before { transform: translateX(16px); }
 
 /* Theme toggle in settings */
 .theme-toggle-row {

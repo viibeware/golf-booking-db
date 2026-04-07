@@ -439,49 +439,87 @@ function loadSettingsUsers() {
                 return;
             }
 
-            // Get current user ID from the sidebar avatar (hack but works without extra data attr)
             const currentUsername = document.querySelector('.sidebar-user-name')?.textContent?.trim();
+            const permLabels = {
+                can_delete: 'Delete', can_archive: 'Archive', can_export: 'Export',
+                can_import: 'Import', can_view_all: 'View All', can_print: 'Print/PDF'
+            };
 
             container.innerHTML = users.map(u => {
                 const isSelf = u.username === currentUsername;
                 const initials = u.username.substring(0, 2).toUpperCase();
                 const created = u.created_at ? u.created_at.split(' ')[0] : '';
 
+                let permTogglesHtml = '';
+                if (u.role === 'editor') {
+                    permTogglesHtml = `<div class="perm-toggles">` +
+                        Object.entries(permLabels).map(([key, label]) => {
+                            const checked = u[key] ? 'checked' : '';
+                            return `<div class="perm-toggle-row">
+                                <span class="perm-toggle-label">${label}</span>
+                                <label class="perm-switch">
+                                    <input type="checkbox" ${checked} onchange="togglePermission(${u.id}, '${key}', this.checked)">
+                                    <span class="perm-switch-slider"></span>
+                                </label>
+                            </div>`;
+                        }).join('') + `</div>`;
+                } else {
+                    permTogglesHtml = '<div class="perm-toggles-admin">All permissions</div>';
+                }
+
                 return `
                 <div class="settings-user-row">
-                    <div class="settings-user-avatar">${initials}</div>
-                    <div class="settings-user-info">
-                        <div class="settings-user-name">
-                            ${u.username}
-                            ${isSelf ? '<span class="settings-user-self-label">(you)</span>' : ''}
+                    <div class="settings-user-header">
+                        <div class="settings-user-avatar">${initials}</div>
+                        <div class="settings-user-info">
+                            <div class="settings-user-name">
+                                ${u.username}
+                                ${isSelf ? '<span class="settings-user-self-label">(you)</span>' : ''}
+                            </div>
+                            <div class="settings-user-meta">
+                                <span class="user-badge ${u.role}">${u.role}</span>
+                                ${created ? ' &middot; joined ' + created : ''}
+                            </div>
                         </div>
-                        <div class="settings-user-meta">
-                            <span class="user-badge ${u.role}">${u.role}</span>
-                            ${created ? ' &middot; joined ' + created : ''}
+                        <div class="settings-user-actions">
+                            <form method="POST" action="/users/${u.id}/edit" style="display:flex;gap:5px;align-items:center;">
+                                <select name="role" style="min-width:90px;padding:4px 8px;font-size:0.78rem;">
+                                    <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor</option>
+                                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                                <input type="password" name="password" placeholder="New pw" style="width:100px;padding:4px 8px;font-size:0.78rem;">
+                                <button type="submit" class="btn btn-sm">Save</button>
+                            </form>
+                            ${!isSelf ? `
+                            <form method="POST" action="/users/${u.id}/delete" onsubmit="return confirm('Delete user ${u.username}?')">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </form>` : ''}
                         </div>
                     </div>
-                    <div class="settings-user-actions">
-                        <form method="POST" action="/users/${u.id}/edit" style="display:flex;gap:5px;align-items:center;">
-                            <select name="role" style="min-width:90px;padding:4px 8px;font-size:0.78rem;">
-                                <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor</option>
-                                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                            </select>
-                            <input type="password" name="password" placeholder="New pw" style="width:100px;padding:4px 8px;font-size:0.78rem;">
-                            <button type="submit" class="btn btn-sm">Save</button>
-                        </form>
-                        ${!isSelf ? `
-                        <form method="POST" action="/users/${u.id}/delete" onsubmit="return confirm('Delete user ${u.username}?')">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            </button>
-                        </form>` : ''}
-                    </div>
+                    ${permTogglesHtml}
                 </div>`;
             }).join('');
         })
         .catch(err => {
             container.innerHTML = '<div style="padding:16px;text-align:center;color:#f87171;font-size:0.85rem;">Failed to load users.</div>';
         });
+}
+
+function togglePermission(userId, permission, value) {
+    fetch(`/users/${userId}/permissions`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({permission, value})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(() => alert('Failed to update permission.'));
 }
 
 // Close settings modal on backdrop click

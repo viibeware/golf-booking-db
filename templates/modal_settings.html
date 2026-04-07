@@ -17,10 +17,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                     Appearance
                 </button>
+                {% if perms.can_export or perms.can_import %}
                 <button class="settings-tab" onclick="switchSettingsTab('data', this)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Data
                 </button>
+                {% endif %}
                 {% if current_user.role == 'admin' %}
                 <button class="settings-tab" onclick="switchSettingsTab('users', this)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -51,7 +53,9 @@
             </div>
 
             <!-- Data Tab -->
+            {% if perms.can_export or perms.can_import %}
             <div class="settings-panel" id="settings-tab-data" style="display:none;">
+                {% if perms.can_export %}
                 <div class="section-card">
                     <div class="section-title">Export</div>
                     <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:12px;">Download all records (active and archived) as a CSV file.</p>
@@ -60,6 +64,8 @@
                         Export All Records to CSV
                     </a>
                 </div>
+                {% endif %}
+                {% if perms.can_import %}
                 <div class="section-card">
                     <div class="section-title">Import</div>
                     <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:12px;">Upload a CSV file to import records. Choose whether to import into active or archived.</p>
@@ -85,7 +91,9 @@
                         </button>
                     </form>
                 </div>
+                {% endif %}
             </div>
+            {% endif %}
 
             <!-- Users Tab (admin only) -->
             {% if current_user.role == 'admin' %}
@@ -130,7 +138,7 @@
                 <div class="section-card" style="text-align:center; padding:28px 18px 20px;">
                     <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;margin-bottom:10px;">
                     <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:2px;">Golf Booking Database</div>
-                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.1</div>
+                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.2</div>
                     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
                         <a href="https://viibeware.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
                             <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware" style="height:18px;width:auto;">

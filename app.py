@@ -49,7 +49,13 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'viewer',
+            role TEXT NOT NULL DEFAULT 'editor',
+            can_delete INTEGER DEFAULT 0,
+            can_archive INTEGER DEFAULT 1,
+            can_export INTEGER DEFAULT 1,
+            can_import INTEGER DEFAULT 1,
+            can_view_all INTEGER DEFAULT 0,
+            can_print INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -155,6 +161,23 @@ def init_db():
             except sqlite3.OperationalError:
                 pass
 
+    # Migrate users table for permissions
+    user_cols = {row[1] for row in db.execute("PRAGMA table_info(users)").fetchall()}
+    user_migrations = {
+        'can_delete': "ALTER TABLE users ADD COLUMN can_delete INTEGER DEFAULT 0",
+        'can_archive': "ALTER TABLE users ADD COLUMN can_archive INTEGER DEFAULT 1",
+        'can_export': "ALTER TABLE users ADD COLUMN can_export INTEGER DEFAULT 1",
+        'can_import': "ALTER TABLE users ADD COLUMN can_import INTEGER DEFAULT 1",
+        'can_view_all': "ALTER TABLE users ADD COLUMN can_view_all INTEGER DEFAULT 0",
+        'can_print': "ALTER TABLE users ADD COLUMN can_print INTEGER DEFAULT 1",
+    }
+    for col, sql in user_migrations.items():
+        if col not in user_cols:
+            try:
+                db.execute(sql)
+            except sqlite3.OperationalError:
+                pass
+
     # Ensure intake_number index exists
     try:
         db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_intake ON bookings(intake_number)")
@@ -218,20 +241,42 @@ def role_required(*roles):
 
 # ─── Context processor ──────────────────────────────────────────────
 
+def get_user_permissions(user_id):
+    """Load permissions for a user. Admins get all permissions."""
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user:
+        return {}
+    if user['role'] == 'admin':
+        return {'can_delete': True, 'can_archive': True, 'can_export': True,
+                'can_import': True, 'can_view_all': True, 'can_print': True}
+    return {
+        'can_delete': bool(user['can_delete']),
+        'can_archive': bool(user['can_archive']),
+        'can_export': bool(user['can_export']),
+        'can_import': bool(user['can_import']),
+        'can_view_all': bool(user['can_view_all']),
+        'can_print': bool(user['can_print']),
+    }
+
 @app.context_processor
 def inject_user():
     ctx = {
-        'current_user': {
-            'id': session.get('user_id'),
-            'username': session.get('username'),
-            'role': session.get('user_role')
-        } if 'user_id' in session else None,
+        'current_user': None,
+        'perms': {},
         'recent_intakes': []
     }
     if 'user_id' in session:
+        perms = get_user_permissions(session.get('user_id'))
+        ctx['current_user'] = {
+            'id': session.get('user_id'),
+            'username': session.get('username'),
+            'role': session.get('user_role')
+        }
+        ctx['perms'] = perms
         try:
             db = get_db()
-            if session.get('user_role') == 'admin':
+            if perms.get('can_view_all'):
                 ctx['recent_intakes'] = db.execute(
                     'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 ORDER BY updated_at DESC LIMIT 8'
                 ).fetchall()
@@ -281,8 +326,24 @@ def users():
 @role_required('admin')
 def api_users():
     db = get_db()
-    all_users = db.execute('SELECT id, username, role, created_at FROM users ORDER BY username').fetchall()
+    all_users = db.execute('SELECT id, username, role, can_delete, can_archive, can_export, can_import, can_view_all, can_print, created_at FROM users ORDER BY username').fetchall()
     return jsonify([dict(u) for u in all_users])
+
+@app.route('/users/<int:user_id>/permissions', methods=['POST'])
+@role_required('admin')
+def update_permissions(user_id):
+    db = get_db()
+    user = db.execute('SELECT role FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user or user['role'] == 'admin':
+        return jsonify({'error': 'Cannot modify admin permissions'}), 400
+    perm = request.json.get('permission', '')
+    value = 1 if request.json.get('value') else 0
+    valid_perms = ['can_delete', 'can_archive', 'can_export', 'can_import', 'can_view_all', 'can_print']
+    if perm not in valid_perms:
+        return jsonify({'error': 'Invalid permission'}), 400
+    db.execute(f'UPDATE users SET {perm}=? WHERE id=?', (value, user_id))
+    db.commit()
+    return jsonify({'ok': True, 'permission': perm, 'value': value})
 
 def _settings_redirect():
     """Redirect back to the referring page with settings modal open."""
@@ -409,8 +470,11 @@ def get_booking_with_tees(db, booking_id):
 # ─── Main routes ────────────────────────────────────────────────────
 
 def can_access_booking(booking):
-    """Check if current user can access a booking. Admins see all, editors see own."""
+    """Check if current user can access a booking."""
     if session.get('user_role') == 'admin':
+        return True
+    perms = get_user_permissions(session.get('user_id'))
+    if perms.get('can_view_all'):
         return True
     return booking['created_by'] == session.get('user_id')
 
@@ -432,8 +496,9 @@ def index():
     query = 'SELECT * FROM bookings WHERE archived=?'
     params = [1 if show_archived else 0]
 
-    # Editors only see their own records
-    if session.get('user_role') != 'admin':
+    # Filter by user unless they have can_view_all
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_view_all'):
         query += ' AND created_by=?'
         params.append(session.get('user_id'))
 
@@ -601,8 +666,12 @@ def edit_booking(booking_id):
     return render_template('booking_form.html', booking=booking, tee_data=tee_data, mode='edit', today=date.today().isoformat())
 
 @app.route('/bookings/<int:booking_id>/delete', methods=['POST'])
-@role_required('admin')
+@login_required
 def delete_booking(booking_id):
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_delete'):
+        flash('You do not have permission to delete records.', 'danger')
+        return redirect(url_for('index'))
     db = get_db()
     check = db.execute('SELECT * FROM bookings WHERE id=?', (booking_id,)).fetchone()
     if check and not can_access_booking(check):
@@ -614,8 +683,12 @@ def delete_booking(booking_id):
     return redirect(url_for('index'))
 
 @app.route('/bookings/<int:booking_id>/archive', methods=['POST'])
-@role_required('admin', 'editor')
+@login_required
 def archive_booking(booking_id):
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_archive'):
+        flash('You do not have permission to archive records.', 'danger')
+        return redirect(url_for('index'))
     db = get_db()
     booking = db.execute('SELECT * FROM bookings WHERE id=?', (booking_id,)).fetchone()
     if booking:
@@ -630,8 +703,12 @@ def archive_booking(booking_id):
     return redirect(url_for('index'))
 
 @app.route('/bookings/archive-bulk', methods=['POST'])
-@role_required('admin', 'editor')
+@login_required
 def archive_bulk():
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_archive'):
+        flash('You do not have permission to archive records.', 'danger')
+        return redirect(url_for('index'))
     ids = request.form.getlist('booking_ids')
     action = request.form.get('action', 'archive')
     if ids:
@@ -648,6 +725,10 @@ def archive_bulk():
 @app.route('/bookings/<int:booking_id>/print')
 @login_required
 def print_booking(booking_id):
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_print'):
+        flash('You do not have permission to print records.', 'danger')
+        return redirect(url_for('index'))
     db = get_db()
     booking, tee_data = get_booking_with_tees(db, booking_id)
     if not booking:
@@ -663,6 +744,10 @@ def print_booking(booking_id):
 @app.route('/bookings/<int:booking_id>/pdf')
 @login_required
 def export_pdf(booking_id):
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_print'):
+        flash('You do not have permission to export PDFs.', 'danger')
+        return redirect(url_for('index'))
     db = get_db()
     booking, tee_data = get_booking_with_tees(db, booking_id)
     if not booking:
@@ -799,20 +884,23 @@ CSV_FIELDS = [
 @app.route('/export/csv')
 @login_required
 def export_csv():
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_export'):
+        flash('You do not have permission to export records.', 'danger')
+        return redirect(url_for('index'))
     db = get_db()
     show_archived = request.args.get('archived', '0') == '1'
     export_all = request.args.get('all', '0') == '1'
 
     if export_all:
-        # Export all records (active + archived)
-        if session.get('user_role') == 'admin':
+        if perms.get('can_view_all'):
             bookings = db.execute('SELECT * FROM bookings ORDER BY date_of_call DESC').fetchall()
         else:
             bookings = db.execute('SELECT * FROM bookings WHERE created_by=? ORDER BY date_of_call DESC',
                                   (session.get('user_id'),)).fetchall()
         filename_label = 'all'
     else:
-        if session.get('user_role') == 'admin':
+        if perms.get('can_view_all'):
             bookings = db.execute('SELECT * FROM bookings WHERE archived=? ORDER BY date_of_call DESC',
                                   (1 if show_archived else 0,)).fetchall()
         else:
@@ -847,8 +935,12 @@ def export_csv():
     )
 
 @app.route('/import/csv', methods=['POST'])
-@role_required('admin', 'editor')
+@login_required
 def import_csv():
+    perms = get_user_permissions(session.get('user_id'))
+    if not perms.get('can_import'):
+        flash('You do not have permission to import records.', 'danger')
+        return _settings_redirect()
     file = request.files.get('csv_file')
     if not file or not file.filename.endswith('.csv'):
         flash('Please upload a valid CSV file.', 'danger')
