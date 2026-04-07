@@ -2,14 +2,13 @@
 
 **Version 0.1.1** | A [viibeware Corp.](https://viibeware.com) Application
 
-A self-hosted web application for collecting and managing customer intake information at a golf resort. Built with Flask and SQLite, packaged as a Docker container for easy deployment on any server.
+A self-hosted web application for collecting and managing customer intake information at a golf resort. Built with Flask and SQLite, packaged as a Docker container for easy deployment.
 
 ---
 
 ## Table of Contents
 
 - [Features](#features)
-- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -78,31 +77,73 @@ A self-hosted web application for collecting and managing customer intake inform
 
 ## Installation
 
-### 1. Download and Extract
-
-Copy the `golf-booking-db` folder to your server:
+### 1. Create a Project Directory
 
 ```bash
-tar -xzf golf-booking-db.tar.gz
-cd golf-booking-db
+mkdir golf-booking-db && cd golf-booking-db
 ```
 
-### 2. Configure Environment
+### 2. Create the Docker Compose File
 
-Copy the example environment file:
+Create a file named `docker-compose.yml`:
 
-```bash
-cp .env.example .env
+```yaml
+services:
+  golf-booking-db:
+    image: viibeware/golf-booking-db:latest
+    container_name: golf-booking-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-5055}:5000"
+    volumes:
+      - golfdb_data:/data
+
+volumes:
+  golfdb_data:
 ```
 
-### 3. Generate a Secret Key
+### 3. Create the Environment File
 
-The `SECRET_KEY` is used to encrypt session cookies. **You must change this before deploying.** Generate a secure key using one of these methods:
+Create a file named `.env`:
+
+```env
+# Flask session encryption key — MUST be changed before deploying
+SECRET_KEY=change-me-generate-a-real-key
+
+# Database file path (inside the container)
+DATABASE=/data/golf_booking_db.db
+
+# Host port the app is accessible on
+APP_PORT=5055
+
+# Default admin credentials (only used on first run)
+DEFAULT_ADMIN_USER=admin
+DEFAULT_ADMIN_PASS=admin
+```
+
+### 4. Generate a Secret Key
+
+The `SECRET_KEY` is used to encrypt session cookies. **You must replace the default value before deploying.** Generate a secure key:
 
 ```bash
-# Python (recommended)
 python3 -c "import secrets; print(secrets.token_hex(32))"
+```
 
+Copy the output and paste it as the `SECRET_KEY` value in your `.env` file:
+
+```bash
+nano .env
+```
+
+```env
+SECRET_KEY=a1b2c3d4e5f6789012345678abcdef0123456789abcdef0123456789abcdef01
+```
+
+Other methods to generate a key:
+
+```bash
 # OpenSSL
 openssl rand -hex 32
 
@@ -110,20 +151,10 @@ openssl rand -hex 32
 head -c 32 /dev/urandom | xxd -p -c 64
 ```
 
-Open `.env` in a text editor and replace the `SECRET_KEY` value:
+### 5. Start the Application
 
 ```bash
-nano .env
-```
-
-```env
-SECRET_KEY=paste-your-generated-key-here
-```
-
-### 4. Build and Start
-
-```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
 The application will be available at:
@@ -132,7 +163,7 @@ The application will be available at:
 http://your-server-ip:5055
 ```
 
-### 5. First Login
+### 6. First Login
 
 Default credentials:
 
@@ -159,22 +190,12 @@ All configuration is managed through the `.env` file. The application reads thes
 | `DEFAULT_ADMIN_USER` | `admin`                         | Username for the default admin account (first run only).     |
 | `DEFAULT_ADMIN_PASS` | `admin`                         | Password for the default admin account (first run only).     |
 
-### Example `.env` File
-
-```env
-SECRET_KEY=a1b2c3d4e5f6789012345678abcdef0123456789abcdef0123456789abcdef01
-DATABASE=/data/golf_booking_db.db
-APP_PORT=5055
-DEFAULT_ADMIN_USER=admin
-DEFAULT_ADMIN_PASS=changeme
-```
-
 ### Best Practices
 
-- **Always generate a unique `SECRET_KEY`** for each deployment. Never use the default or share keys between environments.
+- **Always generate a unique `SECRET_KEY`** for each deployment. Never use the default value or share keys between environments.
 - **Change the default admin password** on first login. The `DEFAULT_ADMIN_USER` and `DEFAULT_ADMIN_PASS` values are only used when the database is first created (no users exist). Changing them in `.env` after users exist has no effect.
-- **Do not commit `.env` to version control.** The `.dockerignore` file already excludes it from Docker builds. If using Git, add `.env` to your `.gitignore`.
-- **Use a reverse proxy** (Nginx, Caddy, or Nginx Proxy Manager) with HTTPS in production. The app runs on HTTP internally — your proxy should handle SSL termination.
+- **Do not commit `.env` to version control.** If using Git, add `.env` to your `.gitignore`.
+- **Use a reverse proxy** (Nginx, Caddy, or Nginx Proxy Manager) with HTTPS in production. The app runs on HTTP internally — your reverse proxy should handle SSL termination.
 - **If you change `SECRET_KEY`** after the app has been running, all active user sessions will be invalidated and users will need to log in again.
 - **Back up your database regularly** (see [Backup & Restore](#backup--restore)).
 
@@ -247,8 +268,6 @@ The application supports multiple users with role-based access control.
 
 ### Exporting Data
 
-There are three export options:
-
 | Method                     | Location                    | What it exports                        |
 |----------------------------|-----------------------------|----------------------------------------|
 | **Export Active to CSV**   | Active Intakes page         | All currently displayed active records |
@@ -268,7 +287,7 @@ The CSV should include column headers matching the export format. Each imported 
 
 ## Backup & Restore
 
-The SQLite database is stored in a Docker volume (`golfdb_data`), which persists across container rebuilds.
+The SQLite database is stored in a Docker volume (`golfdb_data`), which persists across container restarts and image updates.
 
 ### Backup
 
@@ -301,18 +320,22 @@ crontab -e
 
 To update to a new version:
 
-1. **Back up your database** (see above)
-2. Replace the application files with the new version
-3. Rebuild and restart:
+1. **Back up your database** first:
 
 ```bash
-docker compose down
-docker compose up -d --build
+docker cp golf-booking-db:/data/golf_booking_db.db ./backup_before_update.db
+```
+
+2. **Pull the latest image and restart:**
+
+```bash
+docker compose pull
+docker compose up -d
 ```
 
 Your data is preserved in the Docker volume. The application automatically runs database migrations on startup to add any new columns without losing existing data.
 
-> **Note:** If you see stale styles or broken behavior after updating, do a hard refresh in your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`) to clear cached CSS and JavaScript files.
+> **Note:** If you see stale styles or broken behavior after updating, do a hard refresh in your browser (`Ctrl+Shift+R`) to clear cached CSS and JavaScript files.
 
 ---
 
@@ -323,16 +346,16 @@ Your data is preserved in the Docker volume. The application automatically runs 
 ```bash
 docker stop golf-booking-db
 docker rm golf-booking-db
-docker compose up -d --build
+docker compose up -d
 ```
 
-### Settings button doesn't work
+### Settings button doesn't respond
 
-This is usually a browser cache issue. Hard refresh with `Ctrl+Shift+R` or clear your browser cache.
+Hard refresh your browser with `Ctrl+Shift+R` to clear cached JavaScript.
 
 ### "no such column" errors
 
-The app auto-migrates the database on startup. If you see column errors, restart the container:
+The app auto-migrates the database on startup. Restart the container:
 
 ```bash
 docker compose restart
@@ -340,17 +363,21 @@ docker compose restart
 
 ### Port already in use
 
-Change `APP_PORT` in your `.env` file to a different port:
+Change `APP_PORT` in your `.env` file:
 
 ```env
 APP_PORT=5056
 ```
 
-Then restart: `docker compose up -d`
+Then restart:
+
+```bash
+docker compose up -d
+```
 
 ### Forgot admin password
 
-If you're locked out, you can reset directly in the database:
+Reset directly in the database:
 
 ```bash
 docker exec -it golf-booking-db python3 -c "
@@ -362,6 +389,20 @@ conn.execute('UPDATE users SET password_hash=? WHERE username=?',
 conn.commit()
 print('Password reset to: newpassword')
 "
+```
+
+---
+
+## Building from Source
+
+If you prefer to build locally instead of pulling from Docker Hub:
+
+```bash
+git clone https://github.com/viibeware/golf-booking-db.git
+cd golf-booking-db
+cp .env.example .env
+# Edit .env and set your SECRET_KEY
+docker compose up -d --build
 ```
 
 ---
