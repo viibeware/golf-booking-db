@@ -1,0 +1,168 @@
+<!-- Settings Modal -->
+<div class="modal-backdrop" id="settings-modal">
+    <div class="modal-dialog" style="max-width:660px;">
+        <div class="modal-header">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:-3px;margin-right:6px;opacity:0.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Settings
+            </h2>
+            <button class="modal-close" onclick="closeSettingsModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="settings-tabs">
+                <button class="settings-tab active" onclick="switchSettingsTab('appearance', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    Appearance
+                </button>
+                <button class="settings-tab" onclick="switchSettingsTab('data', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Data
+                </button>
+                {% if current_user.role == 'admin' %}
+                <button class="settings-tab" onclick="switchSettingsTab('users', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Users
+                </button>
+                {% endif %}
+                <button class="settings-tab" onclick="switchSettingsTab('about', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    About
+                </button>
+            </div>
+
+            <!-- Appearance Tab -->
+            <div class="settings-panel" id="settings-tab-appearance">
+                <div class="section-card">
+                    <div class="section-title">Theme</div>
+                    <div class="theme-toggle-row">
+                        <div>
+                            <div class="theme-toggle-label">Light Mode</div>
+                            <div class="theme-toggle-desc">Switch between dark and light interface</div>
+                        </div>
+                        <label class="theme-switch">
+                            <input type="checkbox" id="theme-toggle-checkbox" onchange="toggleTheme(this.checked)">
+                            <span class="theme-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Tab -->
+            <div class="settings-panel" id="settings-tab-data" style="display:none;">
+                <div class="section-card">
+                    <div class="section-title">Export</div>
+                    <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:12px;">Download all records (active and archived) as a CSV file.</p>
+                    <a href="{{ url_for('export_csv', all='1') }}" class="btn btn-sm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export All Records to CSV
+                    </a>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">Import</div>
+                    <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:12px;">Upload a CSV file to import records. Choose whether to import into active or archived.</p>
+                    <form method="POST" action="{{ url_for('import_csv') }}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>CSV File</label>
+                            <input type="file" name="csv_file" accept=".csv" required style="font-size:0.84rem;color:var(--text-secondary);">
+                        </div>
+                        <div class="form-group">
+                            <label>Import Into</label>
+                            <div class="toggle-group">
+                                <label class="toggle-option">
+                                    <input type="radio" name="import_to" value="active" checked> Active
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="radio" name="import_to" value="archived"> Archived
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Users Tab (admin only) -->
+            {% if current_user.role == 'admin' %}
+            <div class="settings-panel" id="settings-tab-users" style="display:none;">
+                <div class="section-card">
+                    <div class="section-title">Users</div>
+                    <div id="settings-users-list">
+                        <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">Loading users...</div>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">Add New User</div>
+                    <form method="POST" action="{{ url_for('add_user') }}" class="settings-add-user-form">
+                        <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" name="username" required placeholder="newuser">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" name="password" required placeholder="password">
+                            </div>
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select name="role">
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            Add User
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- About Tab -->
+            <div class="settings-panel" id="settings-tab-about" style="display:none;">
+                <div class="section-card" style="text-align:center; padding:28px 18px 20px;">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;margin-bottom:10px;">
+                    <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:2px;">Golf Booking Database</div>
+                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.1</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
+                        <a href="https://viibeware.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
+                            <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware" style="height:18px;width:auto;">
+                            <span style="font-size:0.78rem;font-weight:600;letter-spacing:0.08em;color:var(--text-secondary);">VIIBEWARE CORP.</span>
+                        </a>
+                    </div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);">
+                        Support: <a href="mailto:viibeware@proton.me" style="color:var(--accent);text-decoration:none;">viibeware@proton.me</a>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">Details</div>
+                    <div class="settings-about-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Stack</div>
+                            <div class="detail-value">Flask + SQLite</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Logged in as</div>
+                            <div class="detail-value">{{ current_user.username }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Role</div>
+                            <div class="detail-value"><span class="user-badge {{ current_user.role }}">{{ current_user.role }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn" onclick="closeSettingsModal()">Close</button>
+        </div>
+    </div>
+</div>

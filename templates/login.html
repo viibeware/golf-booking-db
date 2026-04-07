@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Golf Booking Database</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260407d">
+    <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('gbd-theme') || 'light');</script>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;">
+                <h1>Golf Booking Database</h1>
+                <p>Sign in to manage intakes</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}" style="margin-bottom:16px">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required autofocus autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+        </div>
+    </div>
+    <div class="login-footer">
+        <a href="https://viibeware.com" target="_blank" rel="noopener" class="login-footer-brand">
+            <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware">
+            <span>VIIBEWARE CORP.</span>
+        </a>
+        <span class="login-footer-version">v0.1.1</span>
+    </div>
+</body>
+</html>

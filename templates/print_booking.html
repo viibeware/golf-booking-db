@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print - {{ booking.intake_number or booking.group_name or 'Record' }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20260407d">
+    <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('gbd-theme') || 'light');</script>
+    <style>
+        @media print {
+            .print-actions { display: none !important; }
+            .print-page { box-shadow: none; margin: 0; padding: 12px 16px; max-width: none; border-radius: 0; }
+            body { background: #fff; }
+            html { font-size: 11px; }
+        }
+    </style>
+</head>
+<body style="background:var(--bg-primary)">
+    <div class="print-actions no-print" style="padding:16px 24px; max-width:800px; margin:0 auto;">
+        <button onclick="window.print()" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+        </button>
+        <a href="{{ url_for('view_booking', booking_id=booking.id) }}" class="btn">Back to Record</a>
+    </div>
+
+    <div class="print-page">
+        <h1>Golf Booking Database — {{ booking.intake_number or '#' + booking.id|string }}</h1>
+
+        {% macro pf(label, value) %}
+        <div class="print-field">
+            <div class="print-field-label">{{ label }}</div>
+            <div class="print-field-value">{{ value or '—' }}</div>
+        </div>
+        {% endmacro %}
+
+        <h2>Intake Information</h2>
+        <div class="print-grid">
+            {{ pf('Intake #', booking.intake_number) }}
+            {{ pf('BKG Number', booking.bkg_number) }}
+            {{ pf('Date of Call', booking.date_of_call) }}
+            {{ pf('Year', booking.year) }}
+            {{ pf('Group Name', booking.group_name) }}
+            {{ pf('Contact Name', booking.contact_name) }}
+            {{ pf('Phone', booking.contact_phone) }}
+            {{ pf('Email', booking.contact_email) }}
+            {{ pf('Golfers', booking.num_golfers) }}
+        </div>
+
+        <h2>Dates & Preferences</h2>
+        <div class="print-grid">
+            {{ pf('Preferred Arrival', booking.preferred_arrival) }}
+            {{ pf('Preferred Departure', booking.preferred_departure) }}
+            {{ pf('2nd Option Arrival', booking.second_arrival) }}
+            {{ pf('2nd Option Departure', booking.second_departure) }}
+            {{ pf('Golfed Before?', 'Yes' if booking.golfed_before else 'No') }}
+            {% if booking.golfed_before %}
+            {{ pf('Prior Group', booking.prior_group_name) }}
+            {% endif %}
+            {{ pf('Breakfast', booking.breakfast) }}
+            {{ pf('Accommodation', booking.accommodation) }}
+        </div>
+
+        {% set jpc_vals = (booking.jpc.split(',') if booking.jpc else []) %}
+        {% if jpc_vals %}
+        <h2>Courses</h2>
+        <div class="print-grid">
+            {% if 'J' in jpc_vals %}{{ pf('Jones', (booking.jones_rounds or '—') + ' rounds') }}{% endif %}
+            {% if 'P' in jpc_vals %}{{ pf('Palmer', (booking.palmer_rounds or '—') + ' rounds') }}{% endif %}
+            {% if 'C' in jpc_vals %}{{ pf('Crispin', (booking.crispin_rounds or '—') + ' rounds') }}{% endif %}
+        </div>
+        {% endif %}
+
+        {% if tee_data %}
+        <h2>Tee Times</h2>
+        {% for td in tee_data %}
+        <div class="print-tee-day">
+            <div class="print-tee-day-title">{{ td.day.tee_date or 'Tee Day' }}</div>
+            {% for slot in td.slots %}
+            <div style="margin-left:12px; padding:2px 0; font-size:0.78rem;">
+                {% if slot.course %}<strong>{{ slot.course }}</strong> — {% endif %}{{ slot.tee_time or '' }} {{ slot.ampm or '' }}{% if slot.num_holes %} ({{ slot.num_holes }}h){% endif %}{% if slot.slot_notes %} <em style="color:#888;">{{ slot.slot_notes }}</em>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <h2>Additional Details</h2>
+        <div class="print-grid">
+            {{ pf('Address', booking.address) }}
+            {{ pf('Billing', booking.billing_method) }}
+            {{ pf('Golfed Last Year', booking.golf_last_year) }}
+            {{ pf('Budget', booking.budget) }}
+            {{ pf('Pickup', booking.pickup) }}
+        </div>
+        {% if booking.notes %}
+        {{ pf('Notes', booking.notes) }}
+        {% endif %}
+    </div>
+</body>
+</html>

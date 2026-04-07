@@ -1,0 +1,14 @@
+services:
+  golf-booking-db:
+    build: .
+    container_name: golf-booking-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-5055}:5000"
+    volumes:
+      - golfdb_data:/data
+
+volumes:
+  golfdb_data:

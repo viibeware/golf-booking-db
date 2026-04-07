@@ -1,0 +1,190 @@
+<!-- New Intake Modal -->
+<div class="modal-backdrop" id="new-booking-modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h2>New Intake</h2>
+            <button class="modal-close" onclick="closeNewIntakeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form method="POST" action="{{ url_for('new_booking') }}" id="new-booking-form">
+            <div class="modal-body">
+                <!-- Intake Info -->
+                <div class="section-card">
+                    <div class="section-title">Intake Information</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>BKG Number</label>
+                            <input type="text" name="bkg_number" placeholder="e.g. BKG-2026-001">
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Call</label>
+                            <input type="date" name="date_of_call" id="modal-date-of-call">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="text" name="year" placeholder="e.g. 2026">
+                        </div>
+                        <div class="form-group">
+                            <label>Group Name</label>
+                            <input type="text" name="group_name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contact Name</label>
+                            <input type="text" name="contact_name">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" name="contact_phone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="contact_email">
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Golfers</label>
+                            <input type="number" name="num_golfers" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dates & Preferences -->
+                <div class="section-card">
+                    <div class="section-title">Dates & Preferences</div>
+
+                    <label style="margin-bottom:8px;font-size:0.82rem;">Preferred Dates</label>
+                    <div class="form-row" style="margin-bottom:14px;">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Arrival</label>
+                            <input type="date" name="preferred_arrival">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Departure</label>
+                            <input type="date" name="preferred_departure">
+                        </div>
+                    </div>
+
+                    <label style="margin-bottom:8px;font-size:0.82rem;">2nd Option Dates</label>
+                    <div class="form-row" style="margin-bottom:14px;">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Arrival</label>
+                            <input type="date" name="second_arrival">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Departure</label>
+                            <input type="date" name="second_departure">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Have you golfed with us before?</label>
+                        <div class="toggle-group">
+                            <label class="toggle-option"><input type="radio" name="golfed_before" value="yes"> Yes</label>
+                            <label class="toggle-option"><input type="radio" name="golfed_before" value="no" checked> No</label>
+                        </div>
+                        <div class="conditional-field" id="modal-prior-group-field">
+                            <label>Prior Group Name</label>
+                            <input type="text" name="prior_group_name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Breakfast</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" name="breakfast" value="Yes"> Yes</label>
+                            <label class="checkbox-item"><input type="checkbox" name="breakfast" value="No"> No</label>
+                            <label class="checkbox-item"><input type="checkbox" name="breakfast" value="Quote Both"> Quote Both Ways</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lodging Accommodation</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Cottage"> Cottage</label>
+                            <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Lodge"> Lodge</label>
+                            <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Quote Both Ways"> Quote Both Ways</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses -->
+                <div class="section-card">
+                    <div class="section-title">Courses</div>
+                    <div class="course-row">
+                        <label><input type="checkbox" name="jpc" value="J" onchange="toggleRoundsField(this, 'modal-jones-rounds')"> Jones</label>
+                        <span class="course-rounds-label">Rounds:</span>
+                        <input type="number" name="jones_rounds" id="modal-jones-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    </div>
+                    <div class="course-row">
+                        <label><input type="checkbox" name="jpc" value="P" onchange="toggleRoundsField(this, 'modal-palmer-rounds')"> Palmer</label>
+                        <span class="course-rounds-label">Rounds:</span>
+                        <input type="number" name="palmer_rounds" id="modal-palmer-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    </div>
+                    <div class="course-row">
+                        <label><input type="checkbox" name="jpc" value="C" onchange="toggleRoundsField(this, 'modal-crispin-rounds')"> Crispin</label>
+                        <span class="course-rounds-label">Rounds:</span>
+                        <input type="number" name="crispin_rounds" id="modal-crispin-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    </div>
+                </div>
+
+                <!-- Tee Times -->
+                <div class="section-card">
+                    <div class="section-title">Tee Times & Dates</div>
+                    <div id="modal-tee-days-container"></div>
+                    <button type="button" class="btn btn-sm" onclick="addModalTeeDay()" style="margin-top:4px">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                        Add Tee Day
+                    </button>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="section-card">
+                    <div class="section-title">Additional Details</div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" name="address">
+                    </div>
+                    <div class="form-group">
+                        <label>Billing Method</label>
+                        <div class="toggle-group">
+                            <label class="toggle-option"><input type="radio" name="billing_method" value="Master Bill"> Master Bill</label>
+                            <label class="toggle-option"><input type="radio" name="billing_method" value="Individual Pay"> Individual Pay</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Where did you golf last year?</label>
+                            <input type="text" name="golf_last_year">
+                        </div>
+                        <div class="form-group">
+                            <label>Budget</label>
+                            <input type="text" name="budget" placeholder="e.g. $5,000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pickup</label>
+                        <input type="text" name="pickup">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn" onclick="closeNewIntakeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Create Intake
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

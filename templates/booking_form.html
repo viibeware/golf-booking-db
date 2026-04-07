@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'New' }} Intake - Golf Booking Database{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">{{ 'Edit Intake' if mode == 'edit' else 'New Intake' }}</h1>
+    <a href="{{ url_for('index') }}" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+    </a>
+</div>
+
+<form method="POST" action="{{ url_for('edit_booking', booking_id=booking.id) if mode == 'edit' else url_for('new_booking') }}" id="edit-form" style="max-width:700px;">
+
+    <!-- Intake Info -->
+    <div class="section-card">
+        <div class="section-title">Intake Information</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>BKG Number</label>
+                <input type="text" name="bkg_number" value="{{ booking.bkg_number if booking else '' }}" placeholder="e.g. BKG-2026-001">
+            </div>
+            <div class="form-group">
+                <label>Date of Call</label>
+                <input type="date" name="date_of_call" value="{{ booking.date_of_call if booking else today }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Year</label>
+                <input type="text" name="year" value="{{ booking.year if booking else '' }}" placeholder="e.g. 2026">
+            </div>
+            <div class="form-group">
+                <label>Group Name</label>
+                <input type="text" name="group_name" value="{{ booking.group_name if booking else '' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Contact Name</label>
+                <input type="text" name="contact_name" value="{{ booking.contact_name if booking else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="contact_phone" value="{{ booking.contact_phone if booking else '' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="contact_email" value="{{ booking.contact_email if booking else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Number of Golfers</label>
+                <input type="number" name="num_golfers" min="0" value="{{ booking.num_golfers if booking else '' }}">
+            </div>
+        </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="section-card">
+        <div class="section-title">Dates & Preferences</div>
+
+        <label style="margin-bottom:8px;font-size:0.82rem;">Preferred Dates</label>
+        <div class="form-row" style="margin-bottom:14px;">
+            <div class="form-group" style="margin-bottom:0">
+                <label>Arrival</label>
+                <input type="date" name="preferred_arrival" value="{{ booking.preferred_arrival if booking else '' }}">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label>Departure</label>
+                <input type="date" name="preferred_departure" value="{{ booking.preferred_departure if booking else '' }}">
+            </div>
+        </div>
+
+        <label style="margin-bottom:8px;font-size:0.82rem;">2nd Option Dates</label>
+        <div class="form-row" style="margin-bottom:14px;">
+            <div class="form-group" style="margin-bottom:0">
+                <label>Arrival</label>
+                <input type="date" name="second_arrival" value="{{ booking.second_arrival if booking else '' }}">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+                <label>Departure</label>
+                <input type="date" name="second_departure" value="{{ booking.second_departure if booking else '' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Have you golfed with us before?</label>
+            <div class="toggle-group">
+                <label class="toggle-option">
+                    <input type="radio" name="golfed_before" value="yes" {{ 'checked' if booking and booking.golfed_before else '' }}>
+                    Yes
+                </label>
+                <label class="toggle-option">
+                    <input type="radio" name="golfed_before" value="no" {{ 'checked' if not booking or not booking.golfed_before else '' }}>
+                    No
+                </label>
+            </div>
+            <div class="conditional-field {{ 'visible' if booking and booking.golfed_before else '' }}" id="prior-group-field">
+                <label>Prior Group Name</label>
+                <input type="text" name="prior_group_name" value="{{ booking.prior_group_name if booking else '' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Breakfast</label>
+            {% set breakfast_vals = (booking.breakfast.split(',') if booking and booking.breakfast else []) %}
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="breakfast" value="Yes" {{ 'checked' if 'Yes' in breakfast_vals }}> Yes</label>
+                <label class="checkbox-item"><input type="checkbox" name="breakfast" value="No" {{ 'checked' if 'No' in breakfast_vals }}> No</label>
+                <label class="checkbox-item"><input type="checkbox" name="breakfast" value="Quote Both" {{ 'checked' if 'Quote Both' in breakfast_vals }}> Quote Both Ways</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Lodging Accommodation</label>
+            {% set accom_vals = (booking.accommodation.split(',') if booking and booking.accommodation else []) %}
+            <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Cottage" {{ 'checked' if 'Cottage' in accom_vals }}> Cottage</label>
+                <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Lodge" {{ 'checked' if 'Lodge' in accom_vals }}> Lodge</label>
+                <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Quote Both Ways" {{ 'checked' if 'Quote Both Ways' in accom_vals or 'Both' in accom_vals }}> Quote Both Ways</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses -->
+    <div class="section-card">
+        <div class="section-title">Courses</div>
+        {% set jpc_vals = (booking.jpc.split(',') if booking and booking.jpc else []) %}
+        <div class="course-row">
+            <label><input type="checkbox" name="jpc" value="J" {{ 'checked' if 'J' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-jones-rounds')"> Jones</label>
+            <span class="course-rounds-label">Rounds:</span>
+            <input type="number" name="jones_rounds" id="edit-jones-rounds" class="course-rounds-input {{ 'enabled' if 'J' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.jones_rounds if booking and booking.jones_rounds else '' }}">
+        </div>
+        <div class="course-row">
+            <label><input type="checkbox" name="jpc" value="P" {{ 'checked' if 'P' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-palmer-rounds')"> Palmer</label>
+            <span class="course-rounds-label">Rounds:</span>
+            <input type="number" name="palmer_rounds" id="edit-palmer-rounds" class="course-rounds-input {{ 'enabled' if 'P' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.palmer_rounds if booking and booking.palmer_rounds else '' }}">
+        </div>
+        <div class="course-row">
+            <label><input type="checkbox" name="jpc" value="C" {{ 'checked' if 'C' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-crispin-rounds')"> Crispin</label>
+            <span class="course-rounds-label">Rounds:</span>
+            <input type="number" name="crispin_rounds" id="edit-crispin-rounds" class="course-rounds-input {{ 'enabled' if 'C' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.crispin_rounds if booking and booking.crispin_rounds else '' }}">
+        </div>
+    </div>
+
+    <!-- Tee Times -->
+    <div class="section-card">
+        <div class="section-title">Tee Times & Dates</div>
+        <div id="tee-days-container">
+            {% if tee_data %}
+            {% for td in tee_data %}
+            {% set day_idx = loop.index0 %}
+            <div class="tee-day" id="tee-day-{{ day_idx }}">
+                <div class="tee-day-header">
+                    <div>
+                        <span class="tee-day-label">Tee Day</span>
+                        <span class="tee-day-date-display" id="tee-day-display-{{ day_idx }}"></span>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeTeeDay({{ day_idx }})">Remove Day</button>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="tee_day_date_{{ day_idx }}" value="{{ td.day.tee_date }}" onchange="updateTeeDayDisplay({{ day_idx }}, this.value)">
+                </div>
+                <div id="tee-slots-{{ day_idx }}">
+                    {% for slot in td.slots %}
+                    {% set slot_idx = loop.index0 %}
+                    <div class="tee-slot-card" id="tee-slot-{{ day_idx }}-{{ slot_idx }}">
+                        <div class="tee-slot-top">
+                            <div class="tee-slot-field tee-slot-field-course">
+                                <span class="tee-slot-field-label">Course</span>
+                                <select name="tee_slot_course_{{ day_idx }}_{{ slot_idx }}">
+                                    <option value="">—</option>
+                                    <option value="Jones" {{ 'selected' if slot.course == 'Jones' }}>Jones</option>
+                                    <option value="Palmer" {{ 'selected' if slot.course == 'Palmer' }}>Palmer</option>
+                                    <option value="Crispin" {{ 'selected' if slot.course == 'Crispin' }}>Crispin</option>
+                                </select>
+                            </div>
+                            <div class="tee-slot-field tee-slot-field-time">
+                                <span class="tee-slot-field-label">Time</span>
+                                <input type="text" name="tee_slot_time_{{ day_idx }}_{{ slot_idx }}" placeholder="7:30" value="{{ slot.tee_time or '' }}">
+                            </div>
+                            <div class="tee-slot-field tee-slot-field-ampm">
+                                <span class="tee-slot-field-label">AM/PM</span>
+                                <div class="toggle-group toggle-group-sm">
+                                    <label class="toggle-option {{ 'active' if not slot.ampm or slot.ampm == 'AM' }}"><input type="radio" name="tee_slot_ampm_{{ day_idx }}_{{ slot_idx }}" value="AM" {{ 'checked' if not slot.ampm or slot.ampm == 'AM' }}> AM</label>
+                                    <label class="toggle-option {{ 'active' if slot.ampm == 'PM' }}"><input type="radio" name="tee_slot_ampm_{{ day_idx }}_{{ slot_idx }}" value="PM" {{ 'checked' if slot.ampm == 'PM' }}> PM</label>
+                                </div>
+                            </div>
+                            <div class="tee-slot-field tee-slot-field-holes">
+                                <span class="tee-slot-field-label">Holes</span>
+                                <input type="text" name="tee_slot_holes_{{ day_idx }}_{{ slot_idx }}" placeholder="18" value="{{ slot.num_holes or '' }}">
+                            </div>
+                            <div class="tee-slot-remove">
+                                <button type="button" class="btn-remove" onclick="removeTeeSlot({{ day_idx }}, {{ slot_idx }})">×</button>
+                            </div>
+                        </div>
+                        <div class="tee-slot-bottom">
+                            <span class="tee-slot-field-label">Notes</span>
+                            <input type="text" name="tee_slot_notes_{{ day_idx }}_{{ slot_idx }}" class="tee-slot-notes" placeholder="Notes for this tee time..." value="{{ slot.slot_notes or '' }}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-add-slot btn-sm" onclick="addTeeSlot({{ day_idx }})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Tee Time
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <button type="button" class="btn" onclick="addTeeDay()" style="margin-top:6px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+            Add Tee Day
+        </button>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="section-card">
+        <div class="section-title">Additional Details</div>
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text" name="address" value="{{ booking.address if booking else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Billing Method</label>
+            <div class="toggle-group">
+                <label class="toggle-option"><input type="radio" name="billing_method" value="Master Bill" {{ 'checked' if booking and booking.billing_method == 'Master Bill' }}> Master Bill</label>
+                <label class="toggle-option"><input type="radio" name="billing_method" value="Individual Pay" {{ 'checked' if booking and booking.billing_method == 'Individual Pay' }}> Individual Pay</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Where did you golf last year?</label>
+                <input type="text" name="golf_last_year" value="{{ booking.golf_last_year if booking else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Budget</label>
+                <input type="text" name="budget" value="{{ booking.budget if booking else '' }}" placeholder="e.g. $5,000">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Pickup</label>
+            <input type="text" name="pickup" value="{{ booking.pickup if booking else '' }}">
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" rows="3">{{ booking.notes if booking else '' }}</textarea>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+        <button type="submit" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            {{ 'Update' if mode == 'edit' else 'Create' }} Intake
+        </button>
+        <a href="{{ url_for('index') }}" class="btn">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    {% if tee_data %}
+    initTeeTimes({{ tee_data|length }});
+    {% for td in tee_data %}
+    slotCounts['tee-{{ loop.index0 }}'] = {{ td.slots|length }};
+    {% endfor %}
+    {% else %}
+    initTeeTimes(0);
+    {% endif %}
+</script>
+{% endblock %}
