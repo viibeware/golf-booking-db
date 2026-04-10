@@ -278,15 +278,20 @@ def inject_user():
         ctx['perms'] = perms
         try:
             db = get_db()
-            if perms.get('can_view_all'):
-                ctx['recent_intakes'] = db.execute(
-                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 ORDER BY updated_at DESC LIMIT 3'
-                ).fetchall()
-            else:
-                ctx['recent_intakes'] = db.execute(
-                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 AND created_by=? ORDER BY updated_at DESC LIMIT 3',
-                    (session.get('user_id'),)
-                ).fetchall()
+            recent_limit = int(request.cookies.get('gbd_recent_count', 3))
+            if recent_limit < 0 or recent_limit > 20:
+                recent_limit = 3
+            if recent_limit > 0:
+                if perms.get('can_view_all'):
+                    ctx['recent_intakes'] = db.execute(
+                        'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 ORDER BY updated_at DESC LIMIT ?',
+                        (recent_limit,)
+                    ).fetchall()
+                else:
+                    ctx['recent_intakes'] = db.execute(
+                        'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 AND created_by=? ORDER BY updated_at DESC LIMIT ?',
+                        (session.get('user_id'), recent_limit)
+                    ).fetchall()
         except Exception:
             pass
     return ctx
@@ -765,32 +770,116 @@ def export_pdf(booking_id):
         from reportlab.lib import colors
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import inch
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage
 
         buf = io.BytesIO()
-        doc = SimpleDocTemplate(buf, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch,
+
+        page_width = letter[0] - 1.2*inch
+
+        # ─── Custom page template with footer ───
+        def add_page_footer(canvas, doc):
+            canvas.saveState()
+            canvas.setFont('Helvetica', 7)
+            canvas.setFillColor(colors.HexColor('#94a3b8'))
+            footer_y = 0.4*inch
+            canvas.drawString(0.6*inch, footer_y,
+                f"Golf Booking Database — {booking['intake_number'] or ''}")
+            canvas.drawRightString(letter[0] - 0.6*inch, footer_y,
+                "viibeware Corp. — viibeware.com")
+            # Thin line above footer
+            canvas.setStrokeColor(colors.HexColor('#e2e8f0'))
+            canvas.setLineWidth(0.5)
+            canvas.line(0.6*inch, footer_y + 12, letter[0] - 0.6*inch, footer_y + 12)
+            canvas.restoreState()
+
+        doc = SimpleDocTemplate(buf, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.7*inch,
                                 leftMargin=0.6*inch, rightMargin=0.6*inch)
         styles = getSampleStyleSheet()
 
-        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontSize=14, spaceAfter=2, textColor=colors.HexColor('#1e40af'))
-        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'], fontSize=10, textColor=colors.HexColor('#1e40af'), spaceBefore=8, spaceAfter=3)
-        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontSize=8.5, leading=11)
-        label_style = ParagraphStyle('Label', parent=styles['Normal'], fontSize=7.5, textColor=colors.HexColor('#666666'))
+        # Brand colors
+        accent = colors.HexColor('#2563eb')
+        accent_dark = colors.HexColor('#1e40af')
+        text_primary = colors.HexColor('#1e293b')
+        text_secondary = colors.HexColor('#475569')
+        text_muted = colors.HexColor('#94a3b8')
+        border_color = colors.HexColor('#e2e8f0')
+        bg_section = colors.HexColor('#f8fafc')
+
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'],
+            fontSize=16, spaceAfter=0, textColor=accent_dark, fontName='Helvetica-Bold')
+        subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'],
+            fontSize=9, textColor=text_muted, spaceAfter=2)
+        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'],
+            fontSize=10, textColor=accent_dark, spaceBefore=12, spaceAfter=4,
+            fontName='Helvetica-Bold', borderWidth=0)
+        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'],
+            fontSize=8.5, leading=12, textColor=text_primary)
+        label_style = ParagraphStyle('Label', parent=styles['Normal'],
+            fontSize=7.5, textColor=text_secondary, fontName='Helvetica-Bold')
 
         story = []
-        story.append(Paragraph('Golf Booking Database', title_style))
-        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#3b82f6')))
+
+        # ─── Branded header matching sidebar style ───
+        logo_path = os.path.join(app.static_folder, 'favicon.png')
+        
+        version_style = ParagraphStyle('Version', parent=styles['Normal'],
+            fontSize=7, textColor=text_muted, fontName='Courier')
+        intake_style = ParagraphStyle('IntakeSubtitle', parent=styles['Normal'],
+            fontSize=12, textColor=text_primary, fontName='Helvetica-Bold', spaceBefore=0, spaceAfter=0)
+
+        # Build brand block: [logo] [title + version stacked]
+        brand_text = Paragraph('Golf Booking Database', ParagraphStyle('BrandTitle',
+            parent=styles['Normal'], fontSize=11, fontName='Helvetica-Bold',
+            textColor=text_primary, leading=13, spaceBefore=0, spaceAfter=0))
+        brand_version = Paragraph('v0.1.3', version_style)
+
+        brand_stack = []
+        brand_stack_data = [[brand_text], [brand_version]]
+        brand_stack_table = Table(brand_stack_data, colWidths=[3*inch])
+        brand_stack_table.setStyle(TableStyle([
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ]))
+
+        try:
+            if os.path.exists(logo_path):
+                logo_img = RLImage(logo_path, width=0.2*inch, height=0.2*inch)
+                header_data = [[logo_img, brand_stack_table]]
+            else:
+                header_data = [['', brand_stack_table]]
+        except Exception:
+            header_data = [['', brand_stack_table]]
+
+        header_table = Table(header_data, colWidths=[0.3*inch, page_width - 0.3*inch])
+        header_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ]))
+        story.append(header_table)
         story.append(Spacer(1, 6))
 
-        page_width = letter[0] - 1.2*inch
+        # Accent line
+        story.append(HRFlowable(width="100%", thickness=2, color=accent))
+        story.append(Spacer(1, 4))
+
+        # Intake number + group name subtitle
+        intake_label = booking['intake_number'] or f"#{booking_id}"
+        group_label = booking['group_name'] or 'Unnamed Group'
+        story.append(Paragraph(f'{intake_label} — {group_label}', intake_style))
+        story.append(Spacer(1, 8))
 
         def add_field(label, value):
             data = [[Paragraph(f'<b>{label}</b>', label_style), Paragraph(str(value or '—'), normal_style)]]
             t = Table(data, colWidths=[1.4*inch, page_width - 1.4*inch])
             t.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('TOPPADDING', (0, 0), (-1, -1), 1),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('LINEBELOW', (0, 0), (-1, -1), 0.3, border_color),
             ]))
             story.append(t)
 
@@ -805,19 +894,31 @@ def export_pdf(booking_id):
             t = Table(data, colWidths=[1.1*inch, half - 1.1*inch, 1.1*inch, half - 1.1*inch])
             t.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                ('TOPPADDING', (0, 0), (-1, -1), 1),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+                ('LINEBELOW', (0, 0), (-1, -1), 0.3, border_color),
             ]))
             story.append(t)
 
-        story.append(Paragraph('Intake Information', heading_style))
+        def add_section_heading(text):
+            story.append(Spacer(1, 4))
+            heading_data = [[Paragraph(text, heading_style)]]
+            ht = Table(heading_data, colWidths=[page_width])
+            ht.setStyle(TableStyle([
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                ('LINEBELOW', (0, 0), (-1, -1), 1, accent),
+            ]))
+            story.append(ht)
+
+        add_section_heading('Intake Information')
         add_field_pair('Intake #', booking['intake_number'], 'BKG Number', booking['bkg_number'])
         add_field_pair('Date of Call', booking['date_of_call'], 'Year', booking['year'])
         add_field_pair('Group Name', booking['group_name'], 'Golfers', booking['num_golfers'])
         add_field_pair('Contact', booking['contact_name'], 'Phone', booking['contact_phone'])
         add_field('Email', booking['contact_email'])
 
-        story.append(Paragraph('Dates & Preferences', heading_style))
+        add_section_heading('Dates & Preferences')
         add_field_pair('Pref. Arrival', booking['preferred_arrival'], 'Pref. Departure', booking['preferred_departure'])
         add_field_pair('2nd Arrival', booking['second_arrival'], '2nd Departure', booking['second_departure'])
         golfed = 'Yes' if booking['golfed_before'] else 'No'
@@ -828,7 +929,7 @@ def export_pdf(booking_id):
         add_field_pair('Breakfast', booking['breakfast'], 'Accommodation', booking['accommodation'])
 
         if booking['jpc']:
-            story.append(Paragraph('Courses', heading_style))
+            add_section_heading('Courses')
             courses = booking['jpc'].split(',')
             course_map = {'J': ('Jones', booking['jones_rounds']), 'P': ('Palmer', booking['palmer_rounds']), 'C': ('Crispin', booking['crispin_rounds'])}
             for code in courses:
@@ -837,7 +938,7 @@ def export_pdf(booking_id):
                     add_field(name, f"{rounds or '—'} rounds")
 
         if tee_data:
-            story.append(Paragraph('Tee Times', heading_style))
+            add_section_heading('Tee Times')
             for td in tee_data:
                 day = td['day']
                 if day['tee_date']:
@@ -858,14 +959,14 @@ def export_pdf(booking_id):
                     slots_parts.append(part.strip())
                 add_field(date_str, ' | '.join(slots_parts))
 
-        story.append(Paragraph('Additional Details', heading_style))
+        add_section_heading('Additional Details')
         add_field_pair('Address', booking['address'], 'Billing', booking['billing_method'])
         add_field_pair('Golfed Last Year', booking['golf_last_year'], 'Budget', booking['budget'])
         add_field('Pickup', booking['pickup'])
         if booking['notes']:
             add_field('Notes', booking['notes'])
 
-        doc.build(story)
+        doc.build(story, onFirstPage=add_page_footer, onLaterPages=add_page_footer)
         buf.seek(0)
         filename = f"{booking['intake_number'] or 'intake_' + str(booking_id)}.pdf"
         return send_file(buf, as_attachment=True, download_name=filename, mimetype='application/pdf')

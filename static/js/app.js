@@ -537,6 +537,19 @@ function initTheme() {
     document.documentElement.setAttribute('data-theme', saved);
     const checkbox = document.getElementById('theme-toggle-checkbox');
     if (checkbox) checkbox.checked = (saved === 'light');
+
+    // Init recent count selector
+    const recentCount = localStorage.getItem('gbd-recent-count') || '3';
+    document.cookie = `gbd_recent_count=${recentCount};path=/;max-age=31536000`;
+    const select = document.getElementById('recent-count-select');
+    if (select) select.value = recentCount;
+}
+
+function setRecentCount(val) {
+    localStorage.setItem('gbd-recent-count', val);
+    document.cookie = `gbd_recent_count=${val};path=/;max-age=31536000`;
+    // Reload to apply
+    window.location.reload();
 }
 
 function toggleTheme(isLight) {

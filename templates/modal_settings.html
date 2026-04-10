@@ -50,6 +50,24 @@
                         </label>
                     </div>
                 </div>
+                <div class="section-card">
+                    <div class="section-title">Sidebar</div>
+                    <div class="theme-toggle-row">
+                        <div>
+                            <div class="theme-toggle-label">Recent Intakes</div>
+                            <div class="theme-toggle-desc">Number of recent records shown in the sidebar</div>
+                        </div>
+                        <select id="recent-count-select" onchange="setRecentCount(this.value)" style="width:70px;padding:6px 10px;font-size:0.88rem;text-align:center;">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="5">5</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Data Tab -->
@@ -176,8 +194,12 @@
                                 <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
                             </div>
                             <ul class="release-list">
-                                <li>Sidebar recent intakes list reduced to 3 items</li>
-                                <li>Sessions now persist until explicit logout</li>
+                                <li>Configurable recent intakes count in Settings > Appearance (0–10, default 3)</li>
+                                <li>Branded PDF export with logo, title, version, section dividers, and viibeware footer</li>
+                                <li>In-app release notes in Settings > About</li>
+                                <li>Permanent sessions until explicit logout</li>
+                                <li>Light mode tee slot contrast improvements</li>
+                                <li>Login page viibeware branding footer</li>
                             </ul>
                         </div>
                         <div class="release-version">

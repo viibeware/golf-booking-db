@@ -6,9 +6,19 @@ All notable changes to the Golf Booking Database are documented here.
 
 ## [0.1.3] - 2026-04-10
 
+### Added
+- **Configurable recent intakes count** — Settings > Appearance lets users choose how many recent records appear in the sidebar (0, 1, 2, 3, 5, 8, or 10). Default is 3. Preference is saved per browser.
+- **Branded PDF export** — PDFs now feature the app logo and "Golf Booking Database" title in the upper-left matching the sidebar branding, version number, bold intake number and group name subtitle, accent-colored section dividers with underlines, field row separators, and a professional footer with app name and "viibeware Corp." on every page.
+- **In-app release notes** — Settings > About now includes a scrollable release notes section showing changes across all versions.
+- **CHANGELOG.md** — Full release notes file added to the repository.
+
 ### Changed
-- Recent intakes sidebar list reduced from 8 to 3 items for a cleaner sidebar
+- Recent intakes sidebar list default reduced from 8 to 3 items
+- Recent intakes defined as records most recently saved (by updated_at timestamp)
 - Sessions are now permanent until the user explicitly logs out (365-day session lifetime)
+- PDF header redesigned to match sidebar brand style — compact left-aligned logo with stacked title and version
+- Light mode tee slot cards use white background for better contrast
+- Login page footer shows viibeware logo, company name, and version number
 
 ---
 
