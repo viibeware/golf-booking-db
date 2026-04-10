@@ -280,11 +280,11 @@ def inject_user():
             db = get_db()
             if perms.get('can_view_all'):
                 ctx['recent_intakes'] = db.execute(
-                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 ORDER BY updated_at DESC LIMIT 8'
+                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 ORDER BY updated_at DESC LIMIT 3'
                 ).fetchall()
             else:
                 ctx['recent_intakes'] = db.execute(
-                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 AND created_by=? ORDER BY updated_at DESC LIMIT 8',
+                    'SELECT id, intake_number, group_name, updated_at FROM bookings WHERE archived=0 AND created_by=? ORDER BY updated_at DESC LIMIT 3',
                     (session.get('user_id'),)
                 ).fetchall()
         except Exception:

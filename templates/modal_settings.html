@@ -138,7 +138,7 @@
                 <div class="section-card" style="text-align:center; padding:28px 18px 20px;">
                     <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;margin-bottom:10px;">
                     <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:2px;">Golf Booking Database</div>
-                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.2</div>
+                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.3</div>
                     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
                         <a href="https://viibeware.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
                             <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware" style="height:18px;width:auto;">
@@ -163,6 +163,56 @@
                         <div class="detail-item">
                             <div class="detail-label">Role</div>
                             <div class="detail-value"><span class="user-badge {{ current_user.role }}">{{ current_user.role }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">Release Notes</div>
+                    <div class="release-notes">
+                        <div class="release-version">
+                            <div class="release-version-header">
+                                <span class="release-version-tag">0.1.3</span>
+                                <span class="release-version-date">2026-04-10</span>
+                                <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Sidebar recent intakes list reduced to 3 items</li>
+                                <li>Sessions now persist until explicit logout</li>
+                            </ul>
+                        </div>
+                        <div class="release-version">
+                            <div class="release-version-header">
+                                <span class="release-version-tag">0.1.2</span>
+                                <span class="release-version-date">2026-04-10</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Granular per-user permissions with toggle switches (Delete, Archive, Export, Import, View All, Print/PDF)</li>
+                                <li>Admin panel permission controls for each editor user</li>
+                                <li>All UI buttons conditionally render based on user permissions</li>
+                            </ul>
+                        </div>
+                        <div class="release-version">
+                            <div class="release-version-header">
+                                <span class="release-version-tag">0.1.1</span>
+                                <span class="release-version-date">2026-04-07</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Auto-generated intake numbers (GBD1001, GBD1002, ...)</li>
+                                <li>Arrival/departure dates for preferred and 2nd option</li>
+                                <li>Courses: Jones, Palmer, Crispin with rounds</li>
+                                <li>Redesigned tee time slots with course, time, AM/PM, holes, notes</li>
+                                <li>Multi-user record isolation</li>
+                                <li>Import/Export in Settings, .env config, light mode default</li>
+                            </ul>
+                        </div>
+                        <div class="release-version">
+                            <div class="release-version-header">
+                                <span class="release-version-tag">0.1.0</span>
+                                <span class="release-version-date">2026-04-05</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Initial release — intake form, auth, search, sort, archive, print, PDF/CSV, theme, Docker</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
