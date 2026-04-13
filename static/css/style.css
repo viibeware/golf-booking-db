@@ -1,4 +1,4 @@
-/* ─── Golf Booking Database v0.1.3 ─── */
+/* ─── Golf Booking Database v0.1.4 ─── */
 
 /* ═══ DARK THEME (default) ═══ */
 :root, [data-theme="dark"] {
@@ -388,6 +388,20 @@ label {
 .course-rounds-label {
     font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
     letter-spacing: 0.04em; margin: 0;
+}
+.course-block {
+    padding: 8px 0; border-bottom: 1px solid var(--border-subtle);
+}
+.course-block:last-child { border-bottom: none; }
+.course-notes-input {
+    width: 100%; padding: 6px 10px; font-size: 0.82rem; margin-top: 6px;
+    background: var(--bg-primary); border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); color: var(--text-primary);
+    transition: all var(--transition); opacity: 0.35;
+    pointer-events: none; resize: vertical; min-height: 32px;
+}
+.course-notes-input.enabled {
+    opacity: 1; pointer-events: auto;
 }
 
 /* ═══ TABLE ═══ */

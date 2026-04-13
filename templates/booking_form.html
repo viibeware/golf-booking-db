@@ -122,26 +122,39 @@
                 <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Quote Both Ways" {{ 'checked' if 'Quote Both Ways' in accom_vals or 'Both' in accom_vals }}> Quote Both Ways</label>
             </div>
         </div>
+        <div class="form-group">
+            <label>Lodging Notes</label>
+            <textarea name="accommodation_notes" rows="2" placeholder="Special lodging requests...">{{ booking.accommodation_notes if booking and booking.accommodation_notes else '' }}</textarea>
+        </div>
     </div>
 
     <!-- Courses -->
     <div class="section-card">
         <div class="section-title">Courses</div>
         {% set jpc_vals = (booking.jpc.split(',') if booking and booking.jpc else []) %}
-        <div class="course-row">
-            <label><input type="checkbox" name="jpc" value="J" {{ 'checked' if 'J' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-jones-rounds')"> Jones</label>
-            <span class="course-rounds-label">Rounds:</span>
-            <input type="number" name="jones_rounds" id="edit-jones-rounds" class="course-rounds-input {{ 'enabled' if 'J' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.jones_rounds if booking and booking.jones_rounds else '' }}">
+        <div class="course-block">
+            <div class="course-row">
+                <label><input type="checkbox" name="jpc" value="J" {{ 'checked' if 'J' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-jones-rounds'); toggleCourseNotes(this, 'edit-jones-notes')"> Jones</label>
+                <span class="course-rounds-label">Rounds:</span>
+                <input type="number" name="jones_rounds" id="edit-jones-rounds" class="course-rounds-input {{ 'enabled' if 'J' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.jones_rounds if booking and booking.jones_rounds else '' }}">
+            </div>
+            <textarea name="jones_notes" id="edit-jones-notes" class="course-notes-input {{ 'enabled' if 'J' in jpc_vals }}" rows="1" placeholder="Jones notes...">{{ booking.jones_notes if booking and booking.jones_notes else '' }}</textarea>
         </div>
-        <div class="course-row">
-            <label><input type="checkbox" name="jpc" value="P" {{ 'checked' if 'P' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-palmer-rounds')"> Palmer</label>
-            <span class="course-rounds-label">Rounds:</span>
-            <input type="number" name="palmer_rounds" id="edit-palmer-rounds" class="course-rounds-input {{ 'enabled' if 'P' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.palmer_rounds if booking and booking.palmer_rounds else '' }}">
+        <div class="course-block">
+            <div class="course-row">
+                <label><input type="checkbox" name="jpc" value="P" {{ 'checked' if 'P' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-palmer-rounds'); toggleCourseNotes(this, 'edit-palmer-notes')"> Palmer</label>
+                <span class="course-rounds-label">Rounds:</span>
+                <input type="number" name="palmer_rounds" id="edit-palmer-rounds" class="course-rounds-input {{ 'enabled' if 'P' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.palmer_rounds if booking and booking.palmer_rounds else '' }}">
+            </div>
+            <textarea name="palmer_notes" id="edit-palmer-notes" class="course-notes-input {{ 'enabled' if 'P' in jpc_vals }}" rows="1" placeholder="Palmer notes...">{{ booking.palmer_notes if booking and booking.palmer_notes else '' }}</textarea>
         </div>
-        <div class="course-row">
-            <label><input type="checkbox" name="jpc" value="C" {{ 'checked' if 'C' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-crispin-rounds')"> Crispin</label>
-            <span class="course-rounds-label">Rounds:</span>
-            <input type="number" name="crispin_rounds" id="edit-crispin-rounds" class="course-rounds-input {{ 'enabled' if 'C' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.crispin_rounds if booking and booking.crispin_rounds else '' }}">
+        <div class="course-block">
+            <div class="course-row">
+                <label><input type="checkbox" name="jpc" value="C" {{ 'checked' if 'C' in jpc_vals }} onchange="toggleRoundsField(this, 'edit-crispin-rounds'); toggleCourseNotes(this, 'edit-crispin-notes')"> Crispin</label>
+                <span class="course-rounds-label">Rounds:</span>
+                <input type="number" name="crispin_rounds" id="edit-crispin-rounds" class="course-rounds-input {{ 'enabled' if 'C' in jpc_vals }}" min="0" placeholder="0" value="{{ booking.crispin_rounds if booking and booking.crispin_rounds else '' }}">
+            </div>
+            <textarea name="crispin_notes" id="edit-crispin-notes" class="course-notes-input {{ 'enabled' if 'C' in jpc_vals }}" rows="1" placeholder="Crispin notes...">{{ booking.crispin_notes if booking and booking.crispin_notes else '' }}</textarea>
         </div>
     </div>
 

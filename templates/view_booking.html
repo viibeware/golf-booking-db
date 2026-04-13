@@ -88,6 +88,12 @@
         {% endif %}
         {{ field('Breakfast', booking.breakfast) }}
         {{ field('Accommodation', booking.accommodation) }}
+        {% if booking.accommodation_notes %}
+        <div class="detail-item detail-full">
+            <div class="detail-label">Lodging Notes</div>
+            <div class="detail-value" style="white-space:pre-wrap">{{ booking.accommodation_notes }}</div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -99,12 +105,21 @@
     <div class="detail-grid">
         {% if 'J' in jpc_vals %}
         {{ field('Jones', (booking.jones_rounds or '—') + ' rounds') }}
+        {% if booking.jones_notes %}
+        <div class="detail-item detail-full"><div class="detail-label">Jones Notes</div><div class="detail-value" style="white-space:pre-wrap">{{ booking.jones_notes }}</div></div>
+        {% endif %}
         {% endif %}
         {% if 'P' in jpc_vals %}
         {{ field('Palmer', (booking.palmer_rounds or '—') + ' rounds') }}
+        {% if booking.palmer_notes %}
+        <div class="detail-item detail-full"><div class="detail-label">Palmer Notes</div><div class="detail-value" style="white-space:pre-wrap">{{ booking.palmer_notes }}</div></div>
+        {% endif %}
         {% endif %}
         {% if 'C' in jpc_vals %}
         {{ field('Crispin', (booking.crispin_rounds or '—') + ' rounds') }}
+        {% if booking.crispin_notes %}
+        <div class="detail-item detail-full"><div class="detail-label">Crispin Notes</div><div class="detail-value" style="white-space:pre-wrap">{{ booking.crispin_notes }}</div></div>
+        {% endif %}
         {% endif %}
     </div>
 </div>

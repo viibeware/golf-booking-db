@@ -571,3 +571,14 @@ function toggleRoundsField(checkbox, inputId) {
         input.value = '';
     }
 }
+
+function toggleCourseNotes(checkbox, notesId) {
+    const notes = document.getElementById(notesId);
+    if (!notes) return;
+    if (checkbox.checked) {
+        notes.classList.add('enabled');
+    } else {
+        notes.classList.remove('enabled');
+        notes.value = '';
+    }
+}

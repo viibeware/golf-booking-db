@@ -111,25 +111,38 @@
                             <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Quote Both Ways"> Quote Both Ways</label>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>Lodging Notes</label>
+                        <textarea name="accommodation_notes" rows="2" placeholder="Special lodging requests..."></textarea>
+                    </div>
                 </div>
 
                 <!-- Courses -->
                 <div class="section-card">
                     <div class="section-title">Courses</div>
-                    <div class="course-row">
-                        <label><input type="checkbox" name="jpc" value="J" onchange="toggleRoundsField(this, 'modal-jones-rounds')"> Jones</label>
-                        <span class="course-rounds-label">Rounds:</span>
-                        <input type="number" name="jones_rounds" id="modal-jones-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    <div class="course-block">
+                        <div class="course-row">
+                            <label><input type="checkbox" name="jpc" value="J" onchange="toggleRoundsField(this, 'modal-jones-rounds'); toggleCourseNotes(this, 'modal-jones-notes')"> Jones</label>
+                            <span class="course-rounds-label">Rounds:</span>
+                            <input type="number" name="jones_rounds" id="modal-jones-rounds" class="course-rounds-input" min="0" placeholder="0">
+                        </div>
+                        <textarea name="jones_notes" id="modal-jones-notes" class="course-notes-input" rows="1" placeholder="Jones notes..."></textarea>
                     </div>
-                    <div class="course-row">
-                        <label><input type="checkbox" name="jpc" value="P" onchange="toggleRoundsField(this, 'modal-palmer-rounds')"> Palmer</label>
-                        <span class="course-rounds-label">Rounds:</span>
-                        <input type="number" name="palmer_rounds" id="modal-palmer-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    <div class="course-block">
+                        <div class="course-row">
+                            <label><input type="checkbox" name="jpc" value="P" onchange="toggleRoundsField(this, 'modal-palmer-rounds'); toggleCourseNotes(this, 'modal-palmer-notes')"> Palmer</label>
+                            <span class="course-rounds-label">Rounds:</span>
+                            <input type="number" name="palmer_rounds" id="modal-palmer-rounds" class="course-rounds-input" min="0" placeholder="0">
+                        </div>
+                        <textarea name="palmer_notes" id="modal-palmer-notes" class="course-notes-input" rows="1" placeholder="Palmer notes..."></textarea>
                     </div>
-                    <div class="course-row">
-                        <label><input type="checkbox" name="jpc" value="C" onchange="toggleRoundsField(this, 'modal-crispin-rounds')"> Crispin</label>
-                        <span class="course-rounds-label">Rounds:</span>
-                        <input type="number" name="crispin_rounds" id="modal-crispin-rounds" class="course-rounds-input" min="0" placeholder="0">
+                    <div class="course-block">
+                        <div class="course-row">
+                            <label><input type="checkbox" name="jpc" value="C" onchange="toggleRoundsField(this, 'modal-crispin-rounds'); toggleCourseNotes(this, 'modal-crispin-notes')"> Crispin</label>
+                            <span class="course-rounds-label">Rounds:</span>
+                            <input type="number" name="crispin_rounds" id="modal-crispin-rounds" class="course-rounds-input" min="0" placeholder="0">
+                        </div>
+                        <textarea name="crispin_notes" id="modal-crispin-notes" class="course-notes-input" rows="1" placeholder="Crispin notes..."></textarea>
                     </div>
                 </div>
 

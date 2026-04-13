@@ -1,6 +1,6 @@
 # Golf Booking Database
 
-**Version 0.1.3** | A [viibeware Corp.](https://viibeware.com) Application
+**Version 0.1.4** | A [viibeware Corp.](https://viibeware.com) Application
 
 A self-hosted web application for collecting and managing customer intake information at a golf resort. Built with Flask and SQLite, packaged as a Docker container for easy deployment.
 

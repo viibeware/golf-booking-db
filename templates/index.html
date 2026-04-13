@@ -72,7 +72,6 @@
                 {{ sort_link('contact_name', 'Contact') }}
                 {{ sort_link('num_golfers', 'Golfers') }}
                 {{ sort_link('preferred_date', 'Pref. Date') }}
-                <th>Billing</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -90,11 +89,6 @@
                 <td>{{ b.contact_name or '—' }}</td>
                 <td>{{ b.num_golfers or '—' }}</td>
                 <td class="td-muted">{{ b.preferred_date or '—' }}</td>
-                <td>
-                    {% if b.billing_method %}
-                    <span class="badge {% if b.billing_method == 'Master Bill' %}badge-master{% else %}badge-no{% endif %}">{{ b.billing_method }}</span>
-                    {% else %}—{% endif %}
-                </td>
                 <td>
                     <div class="row-actions">
                         <a href="{{ url_for('view_booking', booking_id=b.id) }}" class="row-link" title="View">

@@ -4,6 +4,20 @@ All notable changes to the Golf Booking Database are documented here.
 
 ---
 
+## [0.1.4] - 2026-04-13
+
+### Added
+- **Lodging Notes** — Free-text notes field under Lodging Accommodations for special lodging requests
+- **Per-course notes** — Each course (Jones, Palmer, Crispin) now has its own notes field that enables when the course is checked. Notes appear in the view, print, PDF, and CSV.
+
+### Changed
+- Removed Billing column from the Active Intakes and Archived Intakes tables for a cleaner layout (billing method still appears in the record detail view)
+- Removed the general "Tee Times Notes" field — replaced by per-course notes under each course in the Courses section
+
+Both new fields appear in the new intake modal, edit form, record view, print layout, PDF export, and CSV export/import.
+
+---
+
 ## [0.1.3] - 2026-04-10
 
 ### Added

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Print - {{ booking.intake_number or booking.group_name or 'Record' }}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=013f">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=014b">
     <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('gbd-theme') || 'light');</script>
     <style>
         @media print {
@@ -60,15 +60,18 @@
             {% endif %}
             {{ pf('Breakfast', booking.breakfast) }}
             {{ pf('Accommodation', booking.accommodation) }}
+            {% if booking.accommodation_notes %}
+            {{ pf('Lodging Notes', booking.accommodation_notes) }}
+            {% endif %}
         </div>
 
         {% set jpc_vals = (booking.jpc.split(',') if booking.jpc else []) %}
         {% if jpc_vals %}
         <h2>Courses</h2>
         <div class="print-grid">
-            {% if 'J' in jpc_vals %}{{ pf('Jones', (booking.jones_rounds or '—') + ' rounds') }}{% endif %}
-            {% if 'P' in jpc_vals %}{{ pf('Palmer', (booking.palmer_rounds or '—') + ' rounds') }}{% endif %}
-            {% if 'C' in jpc_vals %}{{ pf('Crispin', (booking.crispin_rounds or '—') + ' rounds') }}{% endif %}
+            {% if 'J' in jpc_vals %}{{ pf('Jones', (booking.jones_rounds or '—') + ' rounds') }}{% if booking.jones_notes %}{{ pf('Jones Notes', booking.jones_notes) }}{% endif %}{% endif %}
+            {% if 'P' in jpc_vals %}{{ pf('Palmer', (booking.palmer_rounds or '—') + ' rounds') }}{% if booking.palmer_notes %}{{ pf('Palmer Notes', booking.palmer_notes) }}{% endif %}{% endif %}
+            {% if 'C' in jpc_vals %}{{ pf('Crispin', (booking.crispin_rounds or '—') + ' rounds') }}{% if booking.crispin_notes %}{{ pf('Crispin Notes', booking.crispin_notes) }}{% endif %}{% endif %}
         </div>
         {% endif %}
 

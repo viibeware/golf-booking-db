@@ -82,6 +82,7 @@ def init_db():
             prior_group_name TEXT,
             breakfast TEXT,
             accommodation TEXT,
+            accommodation_notes TEXT,
             jpc TEXT,
             jones_rounds TEXT,
             palmer_rounds TEXT,
@@ -92,6 +93,9 @@ def init_db():
             budget TEXT,
             pickup TEXT,
             notes TEXT,
+            jones_notes TEXT,
+            palmer_notes TEXT,
+            crispin_notes TEXT,
             archived INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -141,6 +145,11 @@ def init_db():
         'preferred_departure': "ALTER TABLE bookings ADD COLUMN preferred_departure DATE",
         'second_arrival': "ALTER TABLE bookings ADD COLUMN second_arrival DATE",
         'second_departure': "ALTER TABLE bookings ADD COLUMN second_departure DATE",
+        'accommodation_notes': "ALTER TABLE bookings ADD COLUMN accommodation_notes TEXT",
+        'tee_times_notes': "ALTER TABLE bookings ADD COLUMN tee_times_notes TEXT",
+        'jones_notes': "ALTER TABLE bookings ADD COLUMN jones_notes TEXT",
+        'palmer_notes': "ALTER TABLE bookings ADD COLUMN palmer_notes TEXT",
+        'crispin_notes': "ALTER TABLE bookings ADD COLUMN crispin_notes TEXT",
     }
     for col, sql in migrations.items():
         if col not in existing_cols:
@@ -547,10 +556,12 @@ def new_booking():
                 num_golfers, preferred_date, preferred_arrival, preferred_departure,
                 second_option_date, second_arrival, second_departure,
                 golfed_before, prior_group_name, breakfast, accommodation,
+                accommodation_notes,
                 jpc, address, billing_method, golf_last_year, budget, pickup, notes,
+                jones_notes, palmer_notes, crispin_notes,
                 jones_rounds, palmer_rounds, crispin_rounds,
                 created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             intake_number,
             request.form.get('bkg_number', '').strip(),
@@ -569,13 +580,18 @@ def new_booking():
             request.form.get('second_departure', ''),
             1 if request.form.get('golfed_before') == 'yes' else 0,
             request.form.get('prior_group_name', '').strip(),
-            breakfast, accommodation, jpc,
+            breakfast, accommodation,
+            request.form.get('accommodation_notes', '').strip(),
+            jpc,
             request.form.get('address', '').strip(),
             request.form.get('billing_method', ''),
             request.form.get('golf_last_year', '').strip(),
             request.form.get('budget', '').strip(),
             request.form.get('pickup', '').strip(),
             request.form.get('notes', '').strip(),
+            request.form.get('jones_notes', '').strip(),
+            request.form.get('palmer_notes', '').strip(),
+            request.form.get('crispin_notes', '').strip(),
             request.form.get('jones_rounds', '').strip(),
             request.form.get('palmer_rounds', '').strip(),
             request.form.get('crispin_rounds', '').strip(),
@@ -629,7 +645,9 @@ def edit_booking(booking_id):
                 num_golfers=?, preferred_date=?, preferred_arrival=?, preferred_departure=?,
                 second_option_date=?, second_arrival=?, second_departure=?,
                 golfed_before=?, prior_group_name=?, breakfast=?, accommodation=?,
+                accommodation_notes=?,
                 jpc=?, address=?, billing_method=?, golf_last_year=?, budget=?, pickup=?, notes=?,
+                jones_notes=?, palmer_notes=?, crispin_notes=?,
                 jones_rounds=?, palmer_rounds=?, crispin_rounds=?,
                 updated_at=CURRENT_TIMESTAMP
             WHERE id=?
@@ -650,13 +668,18 @@ def edit_booking(booking_id):
             request.form.get('second_departure', ''),
             1 if request.form.get('golfed_before') == 'yes' else 0,
             request.form.get('prior_group_name', '').strip(),
-            breakfast, accommodation, jpc,
+            breakfast, accommodation,
+            request.form.get('accommodation_notes', '').strip(),
+            jpc,
             request.form.get('address', '').strip(),
             request.form.get('billing_method', ''),
             request.form.get('golf_last_year', '').strip(),
             request.form.get('budget', '').strip(),
             request.form.get('pickup', '').strip(),
             request.form.get('notes', '').strip(),
+            request.form.get('jones_notes', '').strip(),
+            request.form.get('palmer_notes', '').strip(),
+            request.form.get('crispin_notes', '').strip(),
             request.form.get('jones_rounds', '').strip(),
             request.form.get('palmer_rounds', '').strip(),
             request.form.get('crispin_rounds', '').strip(),
@@ -832,7 +855,7 @@ def export_pdf(booking_id):
         brand_text = Paragraph('Golf Booking Database', ParagraphStyle('BrandTitle',
             parent=styles['Normal'], fontSize=11, fontName='Helvetica-Bold',
             textColor=text_primary, leading=13, spaceBefore=0, spaceAfter=0))
-        brand_version = Paragraph('v0.1.3', version_style)
+        brand_version = Paragraph('v0.1.4', version_style)
 
         brand_stack = []
         brand_stack_data = [[brand_text], [brand_version]]
@@ -927,6 +950,8 @@ def export_pdf(booking_id):
         else:
             add_field_pair('Golfed Before?', golfed, '', '')
         add_field_pair('Breakfast', booking['breakfast'], 'Accommodation', booking['accommodation'])
+        if booking['accommodation_notes']:
+            add_field('Lodging Notes', booking['accommodation_notes'])
 
         if booking['jpc']:
             add_section_heading('Courses')
@@ -935,7 +960,11 @@ def export_pdf(booking_id):
             for code in courses:
                 if code in course_map:
                     name, rounds = course_map[code]
-                    add_field(name, f"{rounds or '—'} rounds")
+                    notes_key = {'J': 'jones_notes', 'P': 'palmer_notes', 'C': 'crispin_notes'}[code]
+                    label = f"{rounds or '—'} rounds"
+                    if booking[notes_key]:
+                        label += f" — {booking[notes_key]}"
+                    add_field(name, label)
 
         if tee_data:
             add_section_heading('Tee Times')
@@ -982,7 +1011,9 @@ CSV_FIELDS = [
     'num_golfers', 'preferred_date', 'second_option_date', 'golfed_before',
     'prior_group_name', 'breakfast', 'accommodation', 'jpc', 'address',
     'billing_method', 'golf_last_year', 'budget', 'pickup', 'notes',
-    'jones_rounds', 'palmer_rounds', 'crispin_rounds', 'archived'
+    'accommodation_notes',
+    'jones_rounds', 'palmer_rounds', 'crispin_rounds',
+    'jones_notes', 'palmer_notes', 'crispin_notes', 'archived'
 ]
 
 @app.route('/export/csv')
