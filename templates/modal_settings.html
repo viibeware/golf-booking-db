@@ -156,7 +156,7 @@
                 <div class="section-card" style="text-align:center; padding:28px 18px 20px;">
                     <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;margin-bottom:10px;">
                     <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:2px;">Golf Booking Database</div>
-                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.4</div>
+                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.5</div>
                     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
                         <a href="https://viibeware.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
                             <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware" style="height:18px;width:auto;">
@@ -189,9 +189,18 @@
                     <div class="release-notes">
                         <div class="release-version">
                             <div class="release-version-header">
+                                <span class="release-version-tag">0.1.5</span>
+                                <span class="release-version-date">2026-04-15</span>
+                                <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Smart date pairing — selecting an arrival date automatically sets the departure minimum to the next day and opens the departure calendar on that date</li>
+                            </ul>
+                        </div>
+                        <div class="release-version">
+                            <div class="release-version-header">
                                 <span class="release-version-tag">0.1.4</span>
                                 <span class="release-version-date">2026-04-13</span>
-                                <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
                             </div>
                             <ul class="release-list">
                                 <li>Lodging Notes field under Lodging Accommodations</li>

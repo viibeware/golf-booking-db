@@ -572,6 +572,40 @@ function toggleRoundsField(checkbox, inputId) {
     }
 }
 
+function addDays(isoDate, days) {
+    const d = new Date(isoDate + 'T00:00:00');
+    if (isNaN(d)) return '';
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+}
+
+function wireArrivalDeparturePairs(root) {
+    const scope = root || document;
+    scope.querySelectorAll('input[data-arrival-for]').forEach(arrival => {
+        const depName = arrival.dataset.arrivalFor;
+        const form = arrival.closest('form') || scope;
+        const departure = form.querySelector(`input[name="${depName}"]`);
+        if (!departure || arrival.dataset.pairBound) return;
+        arrival.dataset.pairBound = '1';
+
+        const sync = () => {
+            if (!arrival.value) {
+                departure.min = '';
+                return;
+            }
+            const nextDay = addDays(arrival.value, 1);
+            departure.min = nextDay;
+            if (!departure.value || departure.value < nextDay) {
+                departure.value = nextDay;
+            }
+        };
+        arrival.addEventListener('change', sync);
+        sync();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => wireArrivalDeparturePairs());
+
 function toggleCourseNotes(checkbox, notesId) {
     const notes = document.getElementById(notesId);
     if (!notes) return;

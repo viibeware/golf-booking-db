@@ -4,6 +4,13 @@ All notable changes to the Golf Booking Database are documented here.
 
 ---
 
+## [0.1.5] - 2026-04-15
+
+### Changed
+- **Smart arrival/departure dates** — When an arrival date is selected (preferred or 2nd option), the corresponding departure field is constrained to dates after the arrival and auto-populates to the next day, so the browser's date picker opens on a useful month. Applies to both the New Intake modal and the Edit form.
+
+---
+
 ## [0.1.4] - 2026-04-13
 
 ### Added

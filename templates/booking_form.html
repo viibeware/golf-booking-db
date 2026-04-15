@@ -65,11 +65,11 @@
         <div class="form-row" style="margin-bottom:14px;">
             <div class="form-group" style="margin-bottom:0">
                 <label>Arrival</label>
-                <input type="date" name="preferred_arrival" value="{{ booking.preferred_arrival if booking else '' }}">
+                <input type="date" name="preferred_arrival" value="{{ booking.preferred_arrival if booking else '' }}" data-arrival-for="preferred_departure">
             </div>
             <div class="form-group" style="margin-bottom:0">
                 <label>Departure</label>
-                <input type="date" name="preferred_departure" value="{{ booking.preferred_departure if booking else '' }}">
+                <input type="date" name="preferred_departure" value="{{ booking.preferred_departure if booking else '' }}" data-departure>
             </div>
         </div>
 
@@ -77,11 +77,11 @@
         <div class="form-row" style="margin-bottom:14px;">
             <div class="form-group" style="margin-bottom:0">
                 <label>Arrival</label>
-                <input type="date" name="second_arrival" value="{{ booking.second_arrival if booking else '' }}">
+                <input type="date" name="second_arrival" value="{{ booking.second_arrival if booking else '' }}" data-arrival-for="second_departure">
             </div>
             <div class="form-group" style="margin-bottom:0">
                 <label>Departure</label>
-                <input type="date" name="second_departure" value="{{ booking.second_departure if booking else '' }}">
+                <input type="date" name="second_departure" value="{{ booking.second_departure if booking else '' }}" data-departure>
             </div>
         </div>
 

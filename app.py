@@ -855,7 +855,7 @@ def export_pdf(booking_id):
         brand_text = Paragraph('Golf Booking Database', ParagraphStyle('BrandTitle',
             parent=styles['Normal'], fontSize=11, fontName='Helvetica-Bold',
             textColor=text_primary, leading=13, spaceBefore=0, spaceAfter=0))
-        brand_version = Paragraph('v0.1.4', version_style)
+        brand_version = Paragraph('v0.1.5', version_style)
 
         brand_stack = []
         brand_stack_data = [[brand_text], [brand_version]]
