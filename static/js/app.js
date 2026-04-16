@@ -1,4 +1,4 @@
-// ─── Golf Booking Database v0.1.1 - Client JS ───
+// ─── Golf Booking Database v0.1.6 - Client JS ───
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
