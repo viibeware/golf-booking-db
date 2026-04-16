@@ -9,6 +9,17 @@
         </div>
         <form method="POST" action="{{ url_for('new_booking') }}" id="new-booking-form">
             <div class="modal-body">
+                <!-- V1 -->
+                <div class="section-card">
+                    <div class="section-title">V1</div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <div class="toggle-group">
+                            <label class="toggle-option"><input type="radio" name="v1" value="yes"> Yes</label>
+                            <label class="toggle-option"><input type="radio" name="v1" value="no" checked> No</label>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Intake Info -->
                 <div class="section-card">
                     <div class="section-title">Intake Information</div>
@@ -59,7 +70,7 @@
                     <div class="section-title">Dates & Preferences</div>
 
                     <label style="margin-bottom:8px;font-size:0.82rem;">Preferred Dates</label>
-                    <div class="form-row" style="margin-bottom:14px;">
+                    <div class="form-row" style="margin-bottom:10px;">
                         <div class="form-group" style="margin-bottom:0">
                             <label>Arrival</label>
                             <input type="date" name="preferred_arrival" data-arrival-for="preferred_departure">
@@ -68,6 +79,10 @@
                             <label>Departure</label>
                             <input type="date" name="preferred_departure" data-departure>
                         </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:14px;">
+                        <label>Lodging Notes</label>
+                        <textarea name="accommodation_notes" rows="2" placeholder="What kind of overnight accommodation are they looking for..."></textarea>
                     </div>
 
                     <label style="margin-bottom:8px;font-size:0.82rem;">2nd Option Dates</label>
@@ -110,10 +125,6 @@
                             <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Lodge"> Lodge</label>
                             <label class="checkbox-item"><input type="checkbox" name="accommodation" value="Quote Both Ways"> Quote Both Ways</label>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Lodging Notes</label>
-                        <textarea name="accommodation_notes" rows="2" placeholder="Special lodging requests..."></textarea>
                     </div>
                 </div>
 

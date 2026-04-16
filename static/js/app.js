@@ -44,10 +44,30 @@ function openNewIntakeModal() {
 
 function closeNewIntakeModal() {
     const modal = document.getElementById('new-booking-modal');
-    if (modal) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-    }
+    if (!modal) return;
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+
+    const form = document.getElementById('new-booking-form');
+    if (form) form.reset();
+
+    const teeContainer = document.getElementById('modal-tee-days-container');
+    if (teeContainer) teeContainer.innerHTML = '';
+    modalTeeDayCount = 0;
+
+    modal.querySelectorAll('.toggle-group').forEach(group => {
+        group.querySelectorAll('.toggle-option').forEach(opt => {
+            const input = opt.querySelector('input');
+            opt.classList.toggle('active', !!(input && input.checked));
+        });
+    });
+
+    const priorField = document.getElementById('modal-prior-group-field');
+    if (priorField) priorField.classList.remove('visible');
+
+    modal.querySelectorAll('.course-rounds-input, .course-notes-input').forEach(el => {
+        el.classList.remove('enabled');
+    });
 }
 
 function setModalDate() {
@@ -61,17 +81,10 @@ function setModalDate() {
     }
 }
 
-// Close modal on backdrop click
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-backdrop')) {
-        closeNewIntakeModal();
-    }
-});
-
-// Close modals on Escape key
+// New-intake modal: close button only — no backdrop/Escape close so typed data isn't lost accidentally.
+// Settings modal keeps Escape-to-close; neither modal closes on backdrop click (prior behavior).
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        closeNewIntakeModal();
         closeSettingsModal();
     }
 });

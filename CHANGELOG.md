@@ -4,6 +4,18 @@ All notable changes to the Golf Booking Database are documented here.
 
 ---
 
+## [0.1.6] - 2026-04-16
+
+### Added
+- **V1 section** — A new "V1" section at the top of the new intake modal and edit form with a Yes/No toggle, stored as a flag on the record.
+
+### Changed
+- **Lodging Notes moved under Preferred Dates** — The Lodging Notes box now appears directly under the Preferred Dates arrival/departure row in both the new intake modal and edit form, so accommodation preferences can be captured next to the arrival date.
+- **New Intake modal: close-button only** — Clicking outside the modal no longer closes it and the Escape key is ignored. The modal only closes via the X (top-right) or Cancel button, preventing accidental data loss.
+- **Close button clears the form** — Pressing X or Cancel now resets all fields, removes any added tee-day rows, and restores the toggle defaults without reloading the page, so reopening the modal starts clean.
+
+---
+
 ## [0.1.5] - 2026-04-15
 
 ### Changed
