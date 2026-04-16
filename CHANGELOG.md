@@ -13,6 +13,9 @@ All notable changes to the Golf Booking Database are documented here.
 - **Lodging Notes moved under Preferred Dates** — The Lodging Notes box now appears directly under the Preferred Dates arrival/departure row in both the new intake modal and edit form, so accommodation preferences can be captured next to the arrival date.
 - **New Intake modal: close-button only** — Clicking outside the modal no longer closes it and the Escape key is ignored. The modal only closes via the X (top-right) or Cancel button, preventing accidental data loss.
 - **Close button clears the form** — Pressing X or Cancel now resets all fields, removes any added tee-day rows, and restores the toggle defaults without reloading the page, so reopening the modal starts clean.
+- **PDF export readability** — Body text bumped to 12pt and section headings to 14pt for easier reading.
+- **PDF column alignment** — Single-field and paired-field rows now share the same label-column width, so values line up consistently across every section.
+- **PDF section spacing** — Added extra breathing room above each section heading so the document is less visually jumbled.
 
 ---
 

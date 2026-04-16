@@ -838,12 +838,12 @@ def export_pdf(booking_id):
         subtitle_style = ParagraphStyle('Subtitle', parent=styles['Normal'],
             fontSize=9, textColor=text_muted, spaceAfter=2)
         heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading2'],
-            fontSize=10, textColor=accent_dark, spaceBefore=12, spaceAfter=4,
+            fontSize=14, textColor=accent_dark, spaceBefore=12, spaceAfter=4,
             fontName='Helvetica-Bold', borderWidth=0)
         normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'],
-            fontSize=8.5, leading=12, textColor=text_primary)
+            fontSize=12, leading=15, textColor=text_primary)
         label_style = ParagraphStyle('Label', parent=styles['Normal'],
-            fontSize=7.5, textColor=text_secondary, fontName='Helvetica-Bold')
+            fontSize=12, leading=15, textColor=text_secondary, fontName='Helvetica-Bold')
 
         story = []
 
@@ -901,7 +901,7 @@ def export_pdf(booking_id):
 
         def add_field(label, value):
             data = [[Paragraph(f'<b>{label}</b>', label_style), Paragraph(str(value or '—'), normal_style)]]
-            t = Table(data, colWidths=[1.4*inch, page_width - 1.4*inch])
+            t = Table(data, colWidths=[1.5*inch, page_width - 1.5*inch])
             t.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('TOPPADDING', (0, 0), (-1, -1), 3),
@@ -918,7 +918,7 @@ def export_pdf(booking_id):
                 Paragraph(f'<b>{label2}</b>', label_style),
                 Paragraph(str(value2 or '—'), normal_style),
             ]]
-            t = Table(data, colWidths=[1.1*inch, half - 1.1*inch, 1.1*inch, half - 1.1*inch])
+            t = Table(data, colWidths=[1.5*inch, half - 1.5*inch, 1.5*inch, half - 1.5*inch])
             t.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('TOPPADDING', (0, 0), (-1, -1), 3),
@@ -928,12 +928,12 @@ def export_pdf(booking_id):
             story.append(t)
 
         def add_section_heading(text):
-            story.append(Spacer(1, 4))
+            story.append(Spacer(1, 18))
             heading_data = [[Paragraph(text, heading_style)]]
             ht = Table(heading_data, colWidths=[page_width])
             ht.setStyle(TableStyle([
                 ('TOPPADDING', (0, 0), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
                 ('LINEBELOW', (0, 0), (-1, -1), 1, accent),
             ]))
             story.append(ht)
