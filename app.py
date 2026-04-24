@@ -1,9 +1,11 @@
 import os
 import io
 import csv
+import hashlib
 import secrets
 from datetime import datetime, date
 from functools import wraps
+from pathlib import Path
 
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
@@ -11,6 +13,40 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+
+APP_VERSION = '0.1.7'
+
+
+def _compute_build_id() -> str:
+    """Content hash of the app source tree, computed once at import time.
+
+    Lets the client-side update banner detect redeploys that ship new code
+    under the same APP_VERSION string. Restarting the same container (same
+    code) yields the same hash, so innocuous restarts don't flap the banner.
+    """
+    root = Path(__file__).resolve().parent
+    h = hashlib.blake2b(digest_size=8)
+    exts = {'.py', '.html', '.css', '.js'}
+    skip_parts = {'__pycache__', '.git', 'temp', 'node_modules'}
+    paths = sorted(
+        p for p in root.rglob('*')
+        if p.is_file()
+        and p.suffix in exts
+        and not any(part in skip_parts for part in p.parts)
+    )
+    for p in paths:
+        rel = p.relative_to(root).as_posix().encode('utf-8')
+        h.update(rel)
+        h.update(b'\0')
+        try:
+            h.update(p.read_bytes())
+        except OSError:
+            continue
+        h.update(b'\n')
+    return h.hexdigest()
+
+
+APP_BUILD_ID = _compute_build_id()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
@@ -277,7 +313,9 @@ def inject_user():
     ctx = {
         'current_user': None,
         'perms': {},
-        'recent_intakes': []
+        'recent_intakes': [],
+        'app_version': APP_VERSION,
+        'app_build_id': APP_BUILD_ID,
     }
     if 'user_id' in session:
         perms = get_user_permissions(session.get('user_id'))
@@ -306,6 +344,14 @@ def inject_user():
         except Exception:
             pass
     return ctx
+
+# ─── Version endpoint (auto-sync banner) ────────────────────────────
+
+@app.route('/api/version')
+def api_version():
+    resp = jsonify(version=APP_VERSION, build_id=APP_BUILD_ID)
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
 
 # ─── Auth routes ────────────────────────────────────────────────────
 
@@ -859,7 +905,7 @@ def export_pdf(booking_id):
         brand_text = Paragraph('Golf Booking Database', ParagraphStyle('BrandTitle',
             parent=styles['Normal'], fontSize=11, fontName='Helvetica-Bold',
             textColor=text_primary, leading=13, spaceBefore=0, spaceAfter=0))
-        brand_version = Paragraph('v0.1.6', version_style)
+        brand_version = Paragraph('v0.1.7', version_style)
 
         brand_stack = []
         brand_stack_data = [[brand_text], [brand_version]]

@@ -629,3 +629,72 @@ function toggleCourseNotes(checkbox, notesId) {
         notes.value = '';
     }
 }
+
+// ─── VERSION WATCHER (auto-sync banner) ──────────────────────────────
+// Polls /api/version once a minute. When APP_VERSION or the build_id
+// (a content hash of the source tree) differs from what the page loaded
+// with, a non-blocking banner appears offering a reload. Triggers on
+// same-version redeploys too, because the build_id moves whenever any
+// .py/.html/.css/.js file changes.
+(function () {
+    const meta = document.querySelector('meta[name="app-version"]');
+    if (!meta) return;
+    const bootVersion = (meta.content || '').trim();
+    const bootBuildId = (meta.getAttribute('data-build-id') || '').trim();
+    const checkUrl = meta.getAttribute('data-check-url') || '/api/version';
+    if (!bootVersion && !bootBuildId) return;
+
+    const CHECK_INTERVAL_MS = 60 * 1000;
+    const REPROMPT_AFTER_MS = 10 * 60 * 1000;
+    let bannerShown = false;
+
+    async function check() {
+        if (bannerShown) return;
+        try {
+            const r = await fetch(checkUrl, { cache: 'no-store', credentials: 'same-origin' });
+            if (!r.ok) return;
+            const data = await r.json();
+            const serverVersion = (data && data.version) || '';
+            const serverBuildId = (data && data.build_id) || '';
+            const versionChanged = serverVersion && serverVersion !== bootVersion;
+            const buildChanged = serverBuildId && bootBuildId && serverBuildId !== bootBuildId;
+            if (versionChanged || buildChanged) showBanner(serverVersion);
+        } catch (_) { /* silent — retry next tick */ }
+    }
+
+    function showBanner(newVersion) {
+        if (bannerShown) return;
+        bannerShown = true;
+        const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
+            {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+        ));
+        const el = document.createElement('div');
+        el.id = 'gbd-version-banner';
+        el.className = 'version-update-banner';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        const title = newVersion && newVersion !== bootVersion
+            ? 'Update available — v' + esc(newVersion)
+            : 'Update available';
+        el.innerHTML =
+            '<div>' +
+                '<div class="version-update-banner-title">' + title + '</div>' +
+                '<div class="version-update-banner-sub">Reload when you’re at a stopping point to pick up the latest changes.</div>' +
+            '</div>' +
+            '<div class="version-update-banner-actions">' +
+                '<button type="button" class="btn btn-sm" data-version-dismiss>Later</button>' +
+                '<button type="button" class="btn btn-sm btn-primary" data-version-reload>Reload now</button>' +
+            '</div>';
+        document.body.appendChild(el);
+        el.querySelector('[data-version-dismiss]').addEventListener('click', () => {
+            el.remove();
+            setTimeout(() => { bannerShown = false; check(); }, REPROMPT_AFTER_MS);
+        });
+        el.querySelector('[data-version-reload]').addEventListener('click', () => {
+            window.location.reload();
+        });
+    }
+
+    setTimeout(check, 10000);
+    setInterval(check, CHECK_INTERVAL_MS);
+})();

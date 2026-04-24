@@ -4,6 +4,17 @@ All notable changes to the Golf Booking Database are documented here.
 
 ---
 
+## [0.1.7] - 2026-04-24
+
+### Added
+- **Auto-sync update banner** — Every open tab polls `/api/version` once a minute and displays a non-blocking "Update available" banner (bottom-right) with **Reload now** / **Later** buttons when the server moves past the version the page loaded with. The banner never auto-reloads — users pick the moment. Re-prompts 10 minutes after dismissal.
+- **Same-version redeploy detection** — `/api/version` returns both `version` and a `build_id` (a blake2b content hash of every `.py`/`.html`/`.css`/`.js` file under the app root, computed once at import). The banner triggers whenever either value diverges from the page's boot state, so any redeploy that ships new code wakes up open sessions within ~60s — even if the version string is unchanged. Plain container restarts with identical code keep the same hash and don't flap the banner.
+
+### Changed
+- **Print Record output bumped to 14pt** — Labels, field values, and tee-time slot lines now render at 14pt (previously 10–11px), with headings scaled up proportionally (h1 18pt, h2 15pt) for a readable printout.
+
+---
+
 ## [0.1.6] - 2026-04-16
 
 ### Added

@@ -156,7 +156,7 @@
                 <div class="section-card" style="text-align:center; padding:28px 18px 20px;">
                     <img src="{{ url_for('static', filename='logo.svg') }}" alt="Golf Booking Database" style="width:56px;height:56px;border-radius:12px;margin-bottom:10px;">
                     <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:2px;">Golf Booking Database</div>
-                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.6</div>
+                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">v0.1.7</div>
                     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
                         <a href="https://viibeware.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
                             <img src="{{ url_for('static', filename='viibeware_logo.svg') }}" alt="viibeware" style="height:18px;width:auto;">
@@ -189,9 +189,19 @@
                     <div class="release-notes">
                         <div class="release-version">
                             <div class="release-version-header">
+                                <span class="release-version-tag">0.1.7</span>
+                                <span class="release-version-date">2026-04-24</span>
+                                <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
+                            </div>
+                            <ul class="release-list">
+                                <li>Auto-sync update banner — every tab polls <code>/api/version</code> once a minute and pops a non-blocking "Update available" banner when the server's version or source build-id moves past the one the page loaded with. Triggers on same-version redeploys too (the build-id is a content hash of every <code>.py/.html/.css/.js</code> file), so users always know when to refresh.</li>
+                                <li>Print Record output bumped to 14pt body text — labels, values, and tee-time slots now read cleanly on paper; headings scaled up to match.</li>
+                            </ul>
+                        </div>
+                        <div class="release-version">
+                            <div class="release-version-header">
                                 <span class="release-version-tag">0.1.6</span>
                                 <span class="release-version-date">2026-04-16</span>
-                                <span class="badge badge-yes" style="font-size:0.62rem;padding:2px 8px;">Current</span>
                             </div>
                             <ul class="release-list">
                                 <li>V1 Yes/No toggle as the first section of the new intake modal and edit form</li>
