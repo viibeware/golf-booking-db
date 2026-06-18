@@ -1,3 +1,19 @@
+# Golf Booking Database
+# Copyright (C) 2026 viibeware Corp.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 import io
 import csv
@@ -14,7 +30,7 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
-APP_VERSION = '0.1.7'
+APP_VERSION = '0.2.0'
 
 
 def _compute_build_id() -> str:
@@ -905,7 +921,7 @@ def export_pdf(booking_id):
         brand_text = Paragraph('Golf Booking Database', ParagraphStyle('BrandTitle',
             parent=styles['Normal'], fontSize=11, fontName='Helvetica-Bold',
             textColor=text_primary, leading=13, spaceBefore=0, spaceAfter=0))
-        brand_version = Paragraph('v0.1.7', version_style)
+        brand_version = Paragraph('v0.2.0', version_style)
 
         brand_stack = []
         brand_stack_data = [[brand_text], [brand_version]]

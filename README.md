@@ -1,6 +1,6 @@
 # Golf Booking Database
 
-**Version 0.1.7** | A [viibeware Corp.](https://viibeware.com) Application
+**Version 0.2.0** | A [viibeware Corp.](https://viibeware.com) Application | Licensed under [AGPLv3](LICENSE)
 
 A self-hosted web application for collecting and managing customer intake information at a golf resort. Built with Flask and SQLite, packaged as a Docker container for easy deployment.
 
@@ -427,6 +427,22 @@ docker compose up -d --build
 | PDF Generation | ReportLab                           |
 | Frontend       | Vanilla HTML, CSS, JavaScript       |
 | Container      | Docker with Docker Compose          |
+
+---
+
+## License
+
+The Golf Booking Database is free and open-source software, licensed under the
+**[GNU Affero General Public License v3.0](LICENSE)** (AGPLv3).
+
+You are free to use, study, modify, and redistribute this software under the terms
+of that license. Because the AGPL covers network use, **if you run a modified version
+of this application and let users interact with it over a network, you must also make
+your modified source code available to those users.** The full license text is in the
+[`LICENSE`](LICENSE) file, and the complete source is published at
+[github.com/viibeware/golf-booking-db](https://github.com/viibeware/golf-booking-db).
+
+Copyright © 2026 viibeware Corp.
 
 ---
 

@@ -4,6 +4,13 @@ All notable changes to the Golf Booking Database are documented here.
 
 ---
 
+## [0.2.0] - 2026-06-18
+
+### Added
+- **Open source under AGPLv3** — The Golf Booking Database is now free and open-source software, released under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html). The full license text ships in the repository (`LICENSE`), a license header was added to `app.py`, and the About tab now links to the license and public source repository, satisfying the AGPL's network-use source-offer requirement.
+
+---
+
 ## [0.1.7] - 2026-04-24
 
 ### Added
